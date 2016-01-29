@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+	<servlet>
+		<servlet-name>CoreServlet</servlet-name>
+		<servlet-class>org.wechat.servlet.CoreServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>ShowReportServlet</servlet-name>
+		<servlet-class>org.wechat.servlet.ShowReportServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>BusinessServlet</servlet-name>
+		<servlet-class>
+			org.wechat.servlet.BusinessServlet
+		</servlet-class>
+	</servlet>
+	
+	
+	<servlet-mapping>
+		<servlet-name>CoreServlet</servlet-name>
+		<url-pattern>/CoreServlet</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ShowReportServlet</servlet-name>
+		<url-pattern>/ShowReportServlet</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>BusinessServlet</servlet-name>
+		<url-pattern>/BusinessServlet</url-pattern>
+	</servlet-mapping>
+	
+</web-app>
+
