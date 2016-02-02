@@ -249,7 +249,7 @@ function getData(pageOperObj,pageNum){
 	}else if(popType==4){
 		sendForGoods(curValue,pageNum,backCall);
 	}else if(popType==5){
-		sendForGoods(curValue,pageNum,backCall);
+		sendForGoodsByNumber(curValue,pageNum,backCall);
 	}else{
 		showTip("未知的类型",true);
 	}

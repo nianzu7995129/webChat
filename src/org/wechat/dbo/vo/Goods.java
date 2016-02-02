@@ -19,7 +19,7 @@ public class Goods {
 	// FN_TCGetPtypeTree @szparid=N'00000',@szktypeid=N'00001 ',@bHaveQty=0,@bDisplayStop=0,@selecttype=3,@OperatorID=N'00002 ',@where=N' 1=1 ',@PageNo=1,@PageSize=14 ,@itemCount=@p10 output
 	private static final String sql = "exec FN_TCGetPtypeTree @szparid=?,@szktypeid=?,@bHaveQty=?,@bDisplayStop=?,@selecttype=?,@OperatorID=?,@where=?,@PageNo=?,@PageSize=? ,@itemCount=? output ";
 
-	public String getGoodsInfo(DBAccess dba, String szparid, String szktypeid, String BranchId, String OperatorID, int bDisplayStop, int selectType, int pageNum, int itemsInEachPage) {
+	public String getGoodsInfo(DBAccess dba, String szparid, String szktypeid, String OperatorID, int bDisplayStop, int selectType, int pageNum, int itemsInEachPage) {
 		JSONArray result = new JSONArray();
 		if (szparid == null || "undefined".equals(szparid) || "null".equals(szparid.toLowerCase())) {
 			szparid = DBConst.root_orgnization;
@@ -30,8 +30,8 @@ public class Goods {
 			inParamList.add(new InParam(1, szparid));
 			inParamList.add(new InParam(2, szktypeid)); // 销售订单有值，采购订单有值，库存状况无值
 			inParamList.add(new InParam(3, new Integer(0)));
-			inParamList.add(new InParam(4, new Integer(0)));// 销售订单为0，采购订单为0，库存状况为1
-			inParamList.add(new InParam(5, new Integer(selectType)));// 销售订单为0 ， 采购订单为3， 库存状况为0
+			inParamList.add(new InParam(4, new Integer(bDisplayStop)));// 销售订单为0，采购订单为0，库存状况为1，商品销售分析为1
+			inParamList.add(new InParam(5, new Integer(selectType)));// 销售订单为0 ， 采购订单为3， 库存状况为0，商品销售分析为0
 			inParamList.add(new InParam(6, OperatorID));
 			inParamList.add(new InParam(7, " 1=1 "));
 			inParamList.add(new InParam(8, new Integer(pageNum)));
@@ -55,8 +55,53 @@ public class Goods {
 
 			List<Goods> goodsList = resultSetToList(rs, totalPage);
 			for (Goods tmp : goodsList) {
-				tmp.setSubList(findNext(dba, tmp.ptypeid, szktypeid, BranchId, OperatorID, bDisplayStop, selectType, itemsInEachPage));
+				tmp.setSubList(findNext(dba, tmp.ptypeid, szktypeid, OperatorID, bDisplayStop, selectType, itemsInEachPage));
 			}
+			result = JSONArray.fromObject(goodsList);
+		} catch (Exception e) {
+			e.printStackTrace();
+			if (dba != null) {
+				dba.close();
+			}
+		}
+
+		String tmpResult = result.toString();
+		return tmpResult;
+	}
+	
+	public String getGoodsInfoByGoodsNumber(DBAccess dba, String goodsCode, String storeHouseId, String OperatorID, int pageNum, int itemsInEachPage) {
+		JSONArray result = new JSONArray();
+		//exec FN_TCGetPtypeList @nSearchType=0,@custom1=N'%000 %',@custom2=0,@custom3=0,@szKtypeid=N'00001 ',@selecttype=0,@OperatorID=N'00000 ',@where=N' 1=1 ',@PageNo=1,@PageSize=6,@itemCount=@p11 output
+		String curSql = " exec FN_TCGetPtypeList @nSearchType=?,@custom1=?,@custom2=?,@custom3=?,@szKtypeid=?,@selecttype=?,@OperatorID=?,@where=?,@PageNo=?,@PageSize=?,@itemCount=? ";
+		try {
+			// 设置输入参数列表
+			List<InParam> inParamList = new ArrayList<InParam>();
+			inParamList.add(new InParam(1, new Integer(0)));
+			inParamList.add(new InParam(2, "%"+goodsCode+"%"));
+			inParamList.add(new InParam(3, new Integer(0)));
+			inParamList.add(new InParam(4, new Integer(0)));
+			inParamList.add(new InParam(5, storeHouseId)); // 仓库ID
+			inParamList.add(new InParam(6, new Integer(0)));
+			inParamList.add(new InParam(7, OperatorID));
+			inParamList.add(new InParam(8, " 1=1 "));
+			inParamList.add(new InParam(9, new Integer(pageNum)));
+			inParamList.add(new InParam(10, new Integer(itemsInEachPage)));
+			// 设置输出参数列表
+			List<OutParam> outParamList = new ArrayList<OutParam>();
+			outParamList.add(new OutParam(11, java.sql.Types.INTEGER));
+			
+			List<Object> resultList = dba.executeProcedure(curSql, inParamList, outParamList, 11, true);
+			ResultSet rs = (ResultSet) resultList.get(0);
+			int totalPage = 0;
+			if (resultList.size() > 1) {
+				int itemCount = Integer.parseInt(resultList.get(1).toString());
+				if(itemCount%itemsInEachPage==0){
+					totalPage = itemCount/itemsInEachPage;
+				}else{
+					totalPage = itemCount/itemsInEachPage+1;
+				}
+			}
+			List<Goods> goodsList = resultSetToList(rs, totalPage);
 			result = JSONArray.fromObject(goodsList);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -86,7 +131,7 @@ public class Goods {
 		return tmpList;
 	}
 
-	private List<Goods> findNext(DBAccess dba, String szparid, String szktypeid, String BranchId, String OperatorID, int bDisplayStop, int selectType, int itemsInEachPage) throws SQLException {
+	private List<Goods> findNext(DBAccess dba, String szparid, String szktypeid, String OperatorID, int bDisplayStop, int selectType, int itemsInEachPage) throws SQLException {
 		List<Goods> list = new ArrayList<Goods>();
 
 		// 设置输入参数列表
@@ -94,7 +139,7 @@ public class Goods {
 		inParamList.add(new InParam(1, szparid));
 		inParamList.add(new InParam(2, szktypeid)); // 销售订单有值，采购订单有值，库存状况无值
 		inParamList.add(new InParam(3, new Integer(0)));
-		inParamList.add(new InParam(4, new Integer(0)));// 销售订单为0，采购订单为0，库存状况为1
+		inParamList.add(new InParam(4, new Integer(bDisplayStop)));// 销售订单为0，采购订单为0，库存状况为1
 		inParamList.add(new InParam(5, new Integer(selectType)));// 销售订单为0 ， 采购订单为3， 库存状况为0
 		inParamList.add(new InParam(6, OperatorID));
 		inParamList.add(new InParam(7, " 1=1 "));
@@ -122,7 +167,7 @@ public class Goods {
 		for (Goods tmp : goodsList) {
 			if (szparid.equals(tmp.ptypeid))
 				break;// 子供货单位编码等于上一级则退出循环
-			tmp.setSubList(findNext(dba, tmp.ptypeid, szktypeid, BranchId, OperatorID, bDisplayStop, selectType, itemsInEachPage));
+			tmp.setSubList(findNext(dba, tmp.ptypeid, szktypeid, OperatorID, bDisplayStop, selectType, itemsInEachPage));
 			list.add(tmp);
 		}
 
@@ -172,8 +217,16 @@ public class Goods {
 	public static void main(String args[]) throws Exception {
 		DBAccess dba = new DBAccess(true);
 		Goods goods = new Goods();
+		
+		/*
 		String result = goods.getGoodsInfo(dba, "00000", "00001", "00001", "00002", 0, 0, 1, 5);
 		System.out.println("商品信息：" + result);
+		*/
+		
+		
+		String result = goods.getGoodsInfoByGoodsNumber(dba, "000", "00001", "00000", 1, 5);
+		System.out.println("商品信息：" + result);
+		
 		dba.close();
 	}
 

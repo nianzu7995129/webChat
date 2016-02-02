@@ -107,8 +107,15 @@ public class DBAccess {
 			c.execute();
 			if (withResult) {
 				resultList.add(null);//先占位，第一个为结果集
-				c.getMoreResults();
+				//执行5次，确保找到结果集
+				int count = 0;
+				while(count<5){
+					c.getMoreResults();
+					count++;
+				}
+				
 			}
+			
 			for (OutParam outParam : outParams) {
 				int index = outParam.getIndex();
 				int dataType = outParam.getDataType();
@@ -122,10 +129,13 @@ public class DBAccess {
 					}
 				}
 			}
+			
+			
 			if (withResult) {
 				rs = c.executeQuery();
 				resultList.set(0,rs);
 			}
+			
 		}
 		return resultList;
 	}

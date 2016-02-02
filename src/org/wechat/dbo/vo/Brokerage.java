@@ -14,12 +14,13 @@ public class Brokerage {
 	/** 经手人姓名 */
 	private String efullname;
 
-	public String getBrokerageInfo(DBAccess dba, String BranchId, String OperatorID) {
+	public String getBrokerageInfo(DBAccess dba, String BranchId, int bDisplayStop, String OperatorID) {
 		JSONArray result = new JSONArray();
 		try {
-			String sql = "exec FN_TCGetEtypeTree @szparid=N'',@BranchId=?,@bDisplayStop=0,@OperatorID=?,@shopid=N'0',@UserType=0,@where=N' 1=1 '";
+			String sql = "exec FN_TCGetEtypeTree @szparid=N'',@BranchId=?,@bDisplayStop=?,@OperatorID=?,@shopid=N'0',@UserType=0,@where=N' 1=1 '";
 			List<Object> paramList = new ArrayList<Object>();
 			paramList.add(DBConst.default_orgnization);
+			paramList.add(new Integer(bDisplayStop));
 			paramList.add(OperatorID);
 			ResultSet rs = dba.executeQuery(sql, paramList);
 			List<Brokerage> brokerageList = new ArrayList<Brokerage>();
@@ -60,7 +61,7 @@ public class Brokerage {
 	public static void main(String args[]) throws Exception {
 		DBAccess dba = new DBAccess(true);
 		Brokerage brokerage = new Brokerage();
-		String result = brokerage.getBrokerageInfo(dba, DBConst.default_orgnization, DBConst.default_OperatorID);
+		String result = brokerage.getBrokerageInfo(dba, DBConst.default_orgnization,1, DBConst.default_OperatorID);
 		System.out.println("经手人信息：" + result);
 		dba.close();
 	}

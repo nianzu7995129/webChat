@@ -438,6 +438,51 @@ public class DBUtils {
 	}
 
 	// <<------------------------------------库存状况----------------------------------
+	
+	// --------------------------------------商品销售分析表------------------------------------>>
+
+	public static String genQueryResultForSPXSFXB(String goodsId, String beginDate,String endDate,String employeeID,String deptId,String organization,String OperatorID) throws Exception {
+		DBAccess dba = null;
+		JSONObject jo = new JSONObject();
+		String result = jo.toString();
+		try {
+			dba = new DBAccess(true);
+			// 查询应收信息
+			String sql = "exec FZSaleAnalyse_BS @szPtypeId=?,@szKtypeid=N'',@szBtypeid=N'',@szBtypeid1=N'',@szBeginData=?,@szEndData=?,@ifstop=N'0',@Etypeid=?,@SaleTraitname=N'全部',@Dtypeid=?,@CustType=N'',@branchid=?,@vchtype=N'',@OperatorId=?,@OpID=N'0',@salepriceid=N''";
+			//String sql = "exec FZSaleAnalyse_BS @szPtypeId=N'00005',@szKtypeid=N'',@szBtypeid=N'',@szBtypeid1=N'',@szBeginData=N'2016-01-01',@szEndData=N'2016-01-05',@ifstop=N'0',@Etypeid=N'00001',@SaleTraitname=N'全部',@Dtypeid=N'00001',@CustType=N'',@branchid=N'0000100001',@vchtype=N'',@OperatorId=N'00002',@OpID=N'0',@salepriceid=N''";
+			// 设置输入参数列表
+			List<Object> paramList = new ArrayList<Object>();
+			paramList.add(goodsId);
+			paramList.add(beginDate);
+			paramList.add(endDate);
+			paramList.add(employeeID);
+			paramList.add(deptId);
+			paramList.add(organization);
+			paramList.add(OperatorID);
+			ResultSet rs = dba.executeQuery(sql, paramList);
+			while (rs.next()) {
+				String ptypeid = rs.getString("ptypeid");// 商品标识
+				int Sqty = rs.getInt("Sqty");// 销售数量
+				int CostTotal = rs.getInt("CostTotal");// 成本金额
+				int Profittotal = rs.getInt("Profittotal");// 毛利额
+				jo.put("ptypeid", ptypeid);// 商品标识
+				jo.put("Sqty", new Integer(Sqty));// 销售数量
+				jo.put("CostTotal", new Integer(CostTotal));// 成本金额
+				jo.put("Profittotal", new Integer(Profittotal));// 毛利额
+			}
+			result = jo.toString();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception(e.getMessage());
+		} finally {
+			if (dba != null) {
+				dba.close();
+			}
+		}
+		return result;
+	}
+
+	// <<------------------------------------商品销售分析表----------------------------------
 	public static void main(String args[]) throws Exception {
 		DBAccess dba = new DBAccess(true);
 		String cgdd = DBUtils.genCGDD(dba, "2017-12-29", "127.0.0.1", 7);
@@ -457,6 +502,9 @@ public class DBUtils {
 		/*
 		 * String result = genQueryResultForWLZMB("00003", DBConst.default_orgnization, DBConst.default_OperatorID, 1, "0"); System.out.println("往来账目表查询结果：" + result);
 		 */
+		
+		String result = genQueryResultForSPXSFXB("00005", "2016-01-01", "2016-01-05", "00001", "00001", "0000100001","00002");
+		System.out.println(result);
 
 	}
 }

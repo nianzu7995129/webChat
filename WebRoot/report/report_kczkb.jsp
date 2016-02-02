@@ -44,7 +44,9 @@
 					</div>
 					<div class="ui-field-contain">
 						<label for="shangpin">商品全名：</label>
-						<a id="shangpinHref"><input readonly="readonly" type="text" name="shangpin" orgCode="" id="shangpin"></a>
+						<!-- <a id="shangpinHref"> -->
+						<input type="text" name="shangpin" orgCode="" id="shangpin">
+						<!-- </a> -->
 					</div>
 					<br/>
 					<input type="button" id="queryBtn" class="ui-btn" data-corners="false" data-theme="b" value="查询">
@@ -183,6 +185,7 @@
 			});
 			
 			//进入页面前已加载数据
+			/*
 			$("#shangpinHref").bind("click",function(){
 				var organization = $("#jigou").data("orgCode");
 				if(typeof(organization) == "undefined" || organization==null || organization.length==0){
@@ -195,6 +198,35 @@
 					hideLoader();
 				};
 				sendForGoods(null,null,hideLoader);
+			});
+			*/
+			
+			$("#shangpin").bind("keydown",function(event){
+				if(event.which==13){
+					var tmp = $("#shangpin").val();
+					if(tmp==null || tmp.length==0){
+						var organization = $("#jigou").data("orgCode");
+						if(typeof(organization) == "undefined" || organization==null || organization.length==0){
+							showTip("请先选择机构",true);
+							return;
+						}
+						popType = 4;
+						showLoader();
+						var backCall = function(data){
+							hideLoader();
+						};
+						sendForGoods(null,null,hideLoader);
+						return;
+					}
+					var organization =  $("#jigou").data("orgCode");
+					if(typeof(organization) == "undefined" || organization==null || organization.length==0){
+						showTip("请先选择机构",true);
+						return;
+					}
+					popType = 5;
+					showLoader();
+					sendForGoodsByNumber(null,null,hideLoader);
+				}
 			});
 			
 			//返回机构选择值
@@ -228,7 +260,7 @@
 							storeHouseList = null;		
 						}
 					}
-				}else if(popType==4){
+				}else if(popType==4 || popType==5){
 					if(shangpincode == null){
 						needRefresh = true;
 						shangpincode = customerCode;
@@ -259,7 +291,6 @@
 					setTimeout(function(){
 						var backCall = function(){
 							$("#cangku").selectmenu("enable",true);
-							$("#shangpin").selectmenu("enable",true);
 							$("#queryBtn").button("enable");
 							hideLoader();
 						};
@@ -441,11 +472,10 @@
 		
 		//请求后台生成商品列表
 		function sendForGoods(goodsCode,pageNum,backFunc){
-			var organization =  $("#jigou").data("orgCode");
 			var storeHouseID = $("#cangku").val();
-			var requestData = "action=action_kczkb_goods&organization="+organization+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum=1&itemsInEachPage=5";
+			var requestData = "action=action_kczkb_goods&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum=1&itemsInEachPage=5";
 			if(pageNum!=null){
-				requestData = "action=action_kczkb_goods&organization="+organization+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum="+pageNum+"&itemsInEachPage=5&goodsCode="+goodsCode;
+				requestData = "action=action_kczkb_goods&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum="+pageNum+"&itemsInEachPage=5&goodsCode="+goodsCode;
 			}
 			$.ajax({
 				url: contextPath+"/BusinessServlet",
@@ -479,6 +509,69 @@
 					}
 					if(backFunc){
 						backFunc(data);
+					}
+				}
+		    });
+		}
+		
+		//根据货号模糊查询，请求后台生成商品数据
+		function sendForGoodsByNumber(goodsCode,pageNum,backFunc){
+			var huohao = $("#shangpin").val();
+			var storeHouseID = $("#cangku").val();
+			var requestData = "action=action_goods_bynumer&goodsCode="+huohao+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum=1&itemsInEachPage=5";
+			if(pageNum!=null){
+				requestData = "action=action_goods_bynumer&goodsCode="+huohao+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum="+pageNum+"&itemsInEachPage=5";
+			}
+			$.ajax({
+				url: contextPath+"/BusinessServlet",
+				data: requestData,
+				type: "POST",
+				dataType: 'text',
+				timeout: 10000,
+				async:false,
+				error: function(XMLHttpRequest, textStatus, errorThrown){
+					showTip("请求服务器数据异常!",true);
+					return;
+				},
+				success: function(data){
+					
+					var obj = JSON.parse(data);
+					var result = obj.result;
+					if(obj.isError=="true"){
+						showTip(result,true);
+					}else{
+						$("#treeContainer").empty();
+						goodsData = JSON.stringify(result);
+					}
+					
+					if(result.length==0){
+						popType = 0;
+						showTip("未搜索到商品",true);
+						return;
+					}else if(result.length==1){
+						popType = 0;
+						var tmpObj = result[0];
+						$("#shangpinquanming").val(tmpObj.pfullname);
+						$("#huohao").val(tmpObj.pusercode);	
+						$("#shangpin").val(tmpObj.pfullname);
+						$("#shangpin").data("orgCode",tmpObj.ptypeid);
+						if(backFunc){
+							backFunc(data);
+						}
+					}else{
+						$.mobile.changePage($("#pageBasic"), {
+							 'allowSamePageTransition' : false,
+							 'reloadPage' : false,
+							 transition: 'none'
+						});
+						//树组件内部调用，这里不用刷新了
+						if(pageNum==null){
+							orgTreeObj = new Tree("treeContainer","returnParentDiv","choosedInfoValue","choosedInfoLabel","ptypeid","pfullname",true);
+							orgTreeObj.show(result,true,null);
+						}
+						if(backFunc){
+							backFunc(data);
+						}
 					}
 				}
 		    });

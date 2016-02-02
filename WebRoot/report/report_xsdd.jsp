@@ -616,7 +616,7 @@
 					}
 					popType = 5;
 					showLoader();
-					sendForGoods(null,null,hideLoader);
+					sendForGoodsByNumber(null,null,hideLoader);
 				}
 			});
 		});
@@ -1067,11 +1067,10 @@
 		
 		//请求后台生成商品数据，只取数据，展现留在跳转页面后的点击
 		function sendForGoods(goodsCode,pageNum,backFunc){
-			var organization =  $("#jigou").data("orgCode");
 			var storeHouseID = $("#fahuocangku").val();
-			var requestData = "action=action_xsdd_goods&organization="+organization+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum=1&itemsInEachPage=5";
+			var requestData = "action=action_xsdd_goods&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum=1&itemsInEachPage=5";
 			if(pageNum!=null){
-				requestData = "action=action_xsdd_goods&organization="+organization+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum="+pageNum+"&itemsInEachPage=5&goodsCode="+goodsCode;
+				requestData = "action=action_xsdd_goods&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum="+pageNum+"&itemsInEachPage=5&goodsCode="+goodsCode;
 			}
 			$.ajax({
 				url: contextPath+"/BusinessServlet",
@@ -1179,5 +1178,50 @@
 				}
 		    });
 		}  
+		
+		//根据货号模糊查询，请求后台生成商品数据
+		function sendForGoodsByNumber(goodsCode,pageNum,backFunc){
+			var huohao = $("#cgddgoodsnumber").val();
+			var storeHouseID = $("#shouhuocangku").val();
+			var requestData = "action=action_goods_bynumer&goodsCode="+huohao+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum=1&itemsInEachPage=5";
+			if(pageNum!=null){
+				requestData = "action=action_goods_bynumer&goodsCode="+huohao+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum="+pageNum+"&itemsInEachPage=5";
+			}
+			$.ajax({
+				url: contextPath+"/BusinessServlet",
+				data: requestData,
+				type: "POST",
+				dataType: 'text',
+				timeout: 10000,
+				async:false,
+				error: function(XMLHttpRequest, textStatus, errorThrown){
+					showTip("请求服务器数据异常!",true);
+					return;
+				},
+				success: function(data){
+					var obj = JSON.parse(data);
+					var result = obj.result;
+					if(obj.isError=="true"){
+						showTip(result,true);
+					}else{
+						$("#treeContainer").empty();
+						goodsData = JSON.stringify(result);
+					}
+					$.mobile.changePage($("#pageBasic"), {
+						 'allowSamePageTransition' : false,
+						 'reloadPage' : false,
+						 transition: 'none'
+					});
+					//树组件内部调用，这里不用刷新了
+					if(pageNum==null){
+						orgTreeObj = new Tree("treeContainer","returnParentDiv","choosedInfoValue","choosedInfoLabel","ptypeid","pfullname",true);
+						orgTreeObj.show(result,true,null);
+					}
+					if(backFunc){
+						backFunc(data);
+					}
+				}
+		    });
+		}
 	</script>
 </html>

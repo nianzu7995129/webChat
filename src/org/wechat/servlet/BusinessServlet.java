@@ -17,19 +17,23 @@ public class BusinessServlet extends HttpServlet {
 	private static final String action_xsdd_code = "action_xsdd_code";// 生成销售订单编号
 	private static final String action_code_exist = "action_code_exist";// 订单编号是否重复
 	private static final String action_organization = "action_organization";// 生成机构
-	private static final String action_brokerage = "action_brokerage";// 生成经手人
+	private static final String action_brokerage = "action_brokerage";// 生成经手人(采购订单，销售订单)
+	private static final String action_employee = "action_employee";// 生成职员(商品销售分析表)
 	private static final String action_department = "action_department";// 生成部门
 	private static final String action_xsdd_customer = "action_xsdd_customer";// 销售订单-客户
 	private static final String action_cgdd_supplyunit = "action_cgdd_supplyunit";// 采购订单-供货单位
-	private static final String action_wlzmb_unit = "action_wlzmb_unit";// 往来账目表-单位
+	private static final String action_wlzmb_yfkcx_unit = "action_wlzmb_yfkcx_unit";// 往来账目表-应付款查询-单位
+	private static final String action_wlzmb_yskcx_unit = "action_wlzmb_yskcx_unit";// 往来账目表-应收款查询-单位
 	private static final String action_xsdd_storehouse = "action_xsdd_storehouse";// 销售订单-发货仓库
 	private static final String action_cgdd_storehouse = "action_cgdd_storehouse";// 采购订单-收货仓库
-	private static final String action_kczkb_storehouse = "action_kczkb_storehouse";// 采购订单-收货仓库
+	private static final String action_kczkb_storehouse = "action_kczkb_storehouse";// 库存状况表-仓库全名
+	private static final String action_spxsfxb_storehouse = "action_spxsfxb_storehouse";// 商品销售分析表-仓库全名
 	private static final String action_xsdd_goodstype = "action_xsdd_goodstype";// 销售订单-发货类型
 	private static final String action_cgdd_goodstype = "action_cgdd_goodstype";// 销售订单-收货类型
 	private static final String action_xsdd_goods = "action_xsdd_goods";// 销售订单-商品
 	private static final String action_cgdd_goods = "action_cgdd_goods";// 采购订单-商品
 	private static final String action_kczkb_goods = "action_kczkb_goods";// 库存状况表-商品
+	private static final String action_goods_bynumer = "action_goods_bynumer";// 根据货号模糊查商品列表
 	private static final String action_goodscolor = "action_goodscolor";// 商品颜色
 	private static final String action_goodssize = "action_goodssize";// 商品尺寸
 	private static final String action_goodsprice = "action_goodsprice";// 商品单价
@@ -38,6 +42,7 @@ public class BusinessServlet extends HttpServlet {
 	private static final String action_query_wlzmb = "action_query_wlzmb";// 往来明细表 查询
 	private static final String action_save_cgdd = "action_save_cgdd";// 采购订单(销售订单) 保存
 	private static final String action_query_kczk = "action_query_kczk";// 库存状况表 查询
+	private static final String action_query_spxsfxb = "action_query_spxsfxb";// 商品销售分析表 查询
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doPost(request, response);
@@ -73,7 +78,11 @@ public class BusinessServlet extends HttpServlet {
 			} else if (action_brokerage.equals(action)) {
 				String OperatorID = request.getParameter("OperatorID");
 				String organization = request.getParameter("organization");
-				result = bs.getBrokerage(OperatorID, organization);
+				result = bs.getBrokerage(OperatorID, organization, 0);
+			}else if (action_employee.equals(action)) {
+				String OperatorID = request.getParameter("OperatorID");
+				String organization = request.getParameter("organization");
+				result = bs.getBrokerage(OperatorID, organization, 1);
 			} else if (action_department.equals(action)) {
 				String BrokerageID = request.getParameter("BrokerageID");
 				String OperatorID = request.getParameter("OperatorID");
@@ -93,7 +102,14 @@ public class BusinessServlet extends HttpServlet {
 				int pageNum = Integer.parseInt(request.getParameter("pageNum"));
 				int itemsInEachPage = Integer.parseInt(request.getParameter("itemsInEachPage"));
 				result = bs.getSupplyUnit(1, supplyUnitCode, organization, OperatorID, 0, pageNum, itemsInEachPage);
-			} else if (action_wlzmb_unit.equals(action)) {
+			} else if (action_wlzmb_yfkcx_unit.equals(action)) {
+				String OperatorID = request.getParameter("OperatorID");
+				String supplyUnitCode = request.getParameter("supplyUnitCode");
+				String organization = request.getParameter("organization");
+				int pageNum = Integer.parseInt(request.getParameter("pageNum"));
+				int itemsInEachPage = Integer.parseInt(request.getParameter("itemsInEachPage"));
+				result = bs.getSupplyUnit(1, supplyUnitCode, organization, OperatorID, 1, pageNum, itemsInEachPage);
+			} else if (action_wlzmb_yskcx_unit.equals(action)) {
 				String OperatorID = request.getParameter("OperatorID");
 				String supplyUnitCode = request.getParameter("supplyUnitCode");
 				String organization = request.getParameter("organization");
@@ -112,6 +128,10 @@ public class BusinessServlet extends HttpServlet {
 				String OperatorID = request.getParameter("OperatorID");
 				String organization = request.getParameter("organization");
 				result = bs.getStoreHouse(organization, OperatorID, null, 1);
+			}else if (action_spxsfxb_storehouse.equals(action)) {
+				String OperatorID = request.getParameter("OperatorID");
+				String organization = request.getParameter("organization");
+				result = bs.getStoreHouse(organization, OperatorID, null, 0);
 			} else if (action_xsdd_goodstype.equals(action)) {
 				String organization = request.getParameter("organization");
 				result = bs.getGoodsType(1, organization);
@@ -120,27 +140,31 @@ public class BusinessServlet extends HttpServlet {
 				result = bs.getGoodsType(2, organization);
 			} else if (action_xsdd_goods.equals(action)) {
 				String goodsCode = request.getParameter("goodsCode");
-				String organization = request.getParameter("organization");
 				String OperatorID = request.getParameter("OperatorID");
 				String storeHouseID = request.getParameter("storeHouseID");
 				int pageNum = Integer.parseInt(request.getParameter("pageNum"));
 				int itemsInEachPage = Integer.parseInt(request.getParameter("itemsInEachPage"));
-				result = bs.getGoods(goodsCode, storeHouseID, organization, OperatorID, 0, 0, pageNum, itemsInEachPage);
+				result = bs.getGoods(goodsCode, storeHouseID, OperatorID, 0, 0, pageNum, itemsInEachPage);
 			} else if (action_cgdd_goods.equals(action)) {
 				String goodsCode = request.getParameter("goodsCode");
-				String organization = request.getParameter("organization");
 				String OperatorID = request.getParameter("OperatorID");
 				String storeHouseID = request.getParameter("storeHouseID");
 				int pageNum = Integer.parseInt(request.getParameter("pageNum"));
 				int itemsInEachPage = Integer.parseInt(request.getParameter("itemsInEachPage"));
-				result = bs.getGoods(goodsCode, storeHouseID, organization, OperatorID, 0, 3, pageNum, itemsInEachPage);
-			} else if (action_kczkb_goods.equals(action)) {
+				result = bs.getGoods(goodsCode, storeHouseID, OperatorID, 0, 3, pageNum, itemsInEachPage);
+			} else if (action_kczkb_goods.equals(action)) {//商品销售分析与库存状况表bDisplayStop与selecttype设置相同
 				String goodsCode = request.getParameter("goodsCode");
-				String organization = request.getParameter("organization");
 				String OperatorID = request.getParameter("OperatorID");
 				int pageNum = Integer.parseInt(request.getParameter("pageNum"));
 				int itemsInEachPage = Integer.parseInt(request.getParameter("itemsInEachPage"));
-				result = bs.getGoods(goodsCode, "", organization, OperatorID, 1, 0, pageNum, itemsInEachPage);
+				result = bs.getGoods(goodsCode, "", OperatorID, 1, 0, pageNum, itemsInEachPage);
+			} else if (action_goods_bynumer.equals(action)) {
+				String goodsCode = request.getParameter("goodsCode");
+				String storeHouseID = request.getParameter("storeHouseID");
+				String OperatorID = request.getParameter("OperatorID");
+				int pageNum = Integer.parseInt(request.getParameter("pageNum"));
+				int itemsInEachPage = Integer.parseInt(request.getParameter("itemsInEachPage"));
+				result = bs.getGoodsInfoByNumber(goodsCode, storeHouseID, OperatorID, pageNum, itemsInEachPage);
 			} else if (action_goodscolor.equals(action)) {
 				String storeHouseID = request.getParameter("storeHouseID");
 				String goodsID = request.getParameter("goodsID");
@@ -175,6 +199,15 @@ public class BusinessServlet extends HttpServlet {
 				String goodsInfo = Base64Util.Base64Decode("goodsInfo", request);
 				String goodsDetailInfo = Base64Util.Base64Decode("goodsDetailInfo", request);
 				result = bs.saveForCGDD(cgddInfo, goodsInfo, goodsDetailInfo);
+			} else if (action_query_spxsfxb.equals(action)) {
+				String goodsID = request.getParameter("goodsID");
+				String beginDate = request.getParameter("beginDate");
+				String endDate = request.getParameter("endDate");
+				String employeeID = request.getParameter("employeeID");
+				String deptId = request.getParameter("deptId");
+				String organization = request.getParameter("organization");
+				String OperatorID = request.getParameter("OperatorID");
+				result = bs.queryForSPXSFXB(goodsID, beginDate, endDate, employeeID,deptId,organization,OperatorID);
 			} else {
 				result = "未知的action:" + action;
 				isError = true;

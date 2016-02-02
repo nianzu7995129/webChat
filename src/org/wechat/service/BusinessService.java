@@ -1,5 +1,6 @@
 package org.wechat.service;
 
+import org.wechat.dbo.DBConst;
 import org.wechat.dbo.DBUtils;
 import org.wechat.dbo.DBAccess;
 import org.wechat.dbo.vo.Organization;
@@ -67,7 +68,7 @@ public class BusinessService {
 
 	/**
 	 * @param OperatorID
-	 * @param userType // 销售订单为23,往来账目表为15，采购订单为15,库存状况表 31
+	 * @param userType // 销售订单为23,往来账目表为15，采购订单为15,库存状况表 31,商品销售分析表（15：内部机构，16：加盟机构）
 	 * @return
 	 * @throws Exception
 	 */
@@ -91,16 +92,17 @@ public class BusinessService {
 	/**
 	 * @param OperatorID
 	 * @param organization // 机构编号
+	 * @param bDisplayStop 
 	 * @return
 	 * @throws Exception
 	 */
-	public String getBrokerage(String OperatorID, String organization) throws Exception {
+	public String getBrokerage(String OperatorID, String organization, int bDisplayStop) throws Exception {
 		Brokerage brokerage = new Brokerage();
 		DBAccess dba = null;
 		String result = "";
 		try {
 			dba = new DBAccess();
-			result = brokerage.getBrokerageInfo(dba, organization, OperatorID);
+			result = brokerage.getBrokerageInfo(dba, organization,bDisplayStop, OperatorID);
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
 		} finally {
@@ -124,9 +126,11 @@ public class BusinessService {
 		JSONObject jo = new JSONObject();
 		try {
 			dba = new DBAccess();
-			defaultDepart = dept.getDefaultDepartment(dba, BrokerageID);
+			if (BrokerageID != null &&  (!"undefined".equals(BrokerageID)) && (!"null".equals(BrokerageID.toLowerCase()))) {
+				defaultDepart = dept.getDefaultDepartment(dba, BrokerageID);
+				jo.put("default", defaultDepart);
+			}
 			result = dept.getDepartmentInfo(dba, OperatorID, organization);
-			jo.put("default", defaultDepart);
 			jo.put("info", result);
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
@@ -139,7 +143,7 @@ public class BusinessService {
 	}
 
 	/**
-	 * @param usertype // 1:为采购订单中的供货单位,2:为销售订单中的客户,30:为往来账目表的单位
+	 * @param usertype // 1:为采购订单中的供货单位,2:为销售订单中的客户, 往来账目中 30:应收款查询 1:应付款查询
 	 * @param orgCode
 	 * @param OperatorId
 	 * @param bDisplayStop // 0:为采购订单和销售订单使用 , 1:为往来账目表使用
@@ -231,13 +235,13 @@ public class BusinessService {
 	 * @return
 	 * @throws Exception
 	 */
-	public String getGoods(String szparid, String szktypeid, String orgCode, String OperatorID, int bDisplayStop, int selectType, int pageNum, int itemsInEachPage) throws Exception {
+	public String getGoods(String szparid, String szktypeid, String OperatorID, int bDisplayStop, int selectType, int pageNum, int itemsInEachPage) throws Exception {
 		Goods goods = new Goods();
 		DBAccess dba = null;
 		String result = "";
 		try {
 			dba = new DBAccess();
-			result = goods.getGoodsInfo(dba, szparid, szktypeid, orgCode, OperatorID, bDisplayStop, selectType, pageNum, itemsInEachPage);
+			result = goods.getGoodsInfo(dba, szparid, szktypeid, OperatorID, bDisplayStop, selectType, pageNum, itemsInEachPage);
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
 		} finally {
@@ -338,6 +342,33 @@ public class BusinessService {
 		}
 		return result;
 	}
+	
+	/**
+	 * 根据货号获得商品列表
+	 * @param goodsCode
+	 * @param storeHouseId
+	 * @param OperatorID
+	 * @param pageNum
+	 * @param itemsInEachPage
+	 * @return
+	 * @throws Exception
+	 */
+	public String getGoodsInfoByNumber(String goodsCode, String storeHouseId, String OperatorID,int pageNum,int itemsInEachPage) throws Exception {
+		Goods goods = new Goods();
+		DBAccess dba = null;
+		String result = "";
+		try {
+			dba = new DBAccess();
+			result = goods.getGoodsInfoByGoodsNumber(dba, goodsCode, storeHouseId, OperatorID, pageNum, itemsInEachPage);
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		} finally {
+			if (dba != null) {
+				dba.close();
+			}
+		}
+		return result;
+	}
 
 	/**
 	 * @param supplyUnit 单位
@@ -355,6 +386,11 @@ public class BusinessService {
 
 	public String queryForKCZKB(String goodsId, String organization, String storeHouseID, String OperatorID) throws Exception {
 		String result = DBUtils.genQueryResultForKCZK(goodsId, organization, storeHouseID, OperatorID);
+		return result;
+	}
+	
+	public String queryForSPXSFXB(String goodsId, String beginDate,String endDate,String employeeID,String deptId,String organization,String OperatorID) throws Exception {
+		String result = DBUtils.genQueryResultForSPXSFXB(goodsId, beginDate, endDate, employeeID,deptId,organization,OperatorID);
 		return result;
 	}
 
