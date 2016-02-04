@@ -39,7 +39,9 @@
 					</div>
 					<div class="ui-field-contain">
 						<label for="danwei">单位全名：</label>
-						<a id="danweiHref"><input readonly="readonly" type="text" name="danwei" id="danwei"></a>
+						<!-- <a id="danweiHref"> -->
+							<input type="text" name="danwei" id="danwei">
+						<!-- </a> -->
 					</div>
 					<div class="ui-field-contain">
     					<label for="allShow">显示方式：</label>
@@ -294,6 +296,7 @@
 			});
 			
 			//生成客户
+			/*
 			$("#danweiHref").bind("click",function(){
 				var organization =  $("#jigou").data("orgCode");
 				if(typeof(organization) == "undefined" || organization==null || organization.length==0){
@@ -304,6 +307,32 @@
 				showLoader();
 				sendForSupplyUnit();
 			});
+			*/
+			
+			$("#danwei").bind("keydown",function(event){
+				if(event.which==13){
+					var organization = $("#jigou").data("orgCode");
+					var tmp = $("#danwei").val();
+					if(tmp==null || tmp.length==0){
+						if(typeof(organization) == "undefined" || organization==null || organization.length==0){
+							showTip("请先选择机构",true);
+							return;
+						}
+						popType = 2;
+						sendForSupplyUnit();
+						return;
+					}
+					if(typeof(organization) == "undefined" || organization==null || organization.length==0){
+						showTip("请先选择机构",true);
+						return;
+					}
+					popType = 6;
+					showLoader();
+					sendForSupplyunitByName(null,hideLoader);
+				}
+			});
+			
+			
 			
 			//返回机构选择值
 			$("#confirmOrgBtn").bind("click",function(){
@@ -314,7 +343,7 @@
 					var content = "";
 					if(popType==1 || popType==3){
 						content = "请选择机构信息";
-					}else if(popType == 2){
+					}else if(popType == 2 || popType == 6){
 						content = "请选择单位";
 					}else{}
 					showTip(content+"或\"返回\"",true);
@@ -338,7 +367,7 @@
 							$("#danwei").data("orgCode","");
 						}
 					}
-				}else if(popType==2){
+				}else if(popType==2 || popType==6){
 					$("#danwei").val(customerName);
 					$("#danwei").data("orgCode",customerCode);
 				}
@@ -454,6 +483,65 @@
 						}
 					}else{
 						backCall(data);
+					}
+				}
+		    });
+		}
+		
+		//根据单位编号或名称模糊查询，请求后台生成单位数据
+		function sendForSupplyunitByName(pageNum,backFunc){
+			var danwei = $("#danwei").val();
+			var organization = $("#jigou").data("orgCode");
+			var requestData = "action=action_supplyunit_byname&name="+danwei+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum=1&itemsInEachPage=5";
+			if(pageNum!=null){
+				requestData = "action=action_supplyunit_byname&name="+danwei+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum="+pageNum+"&itemsInEachPage=5";
+			}
+			$.ajax({
+				url: contextPath+"/BusinessServlet",
+				data: requestData,
+				type: "POST",
+				dataType: 'text',
+				timeout: 10000,
+				async:false,
+				error: function(XMLHttpRequest, textStatus, errorThrown){
+					showTip("请求服务器数据异常!",true);
+					return;
+				},
+				success: function(data){
+					var obj = JSON.parse(data);
+					var result = obj.result;
+					if(obj.isError=="true"){
+						showTip(result,true);
+					}else{
+						$("#treeContainer").empty();
+						customerData = JSON.stringify(result);
+					}
+					if(result.length==0){
+						popType = 0;
+						showTip("未搜索到供货单位",true);
+						return;
+					}else if(result.length==1){
+						popType = 0;
+						var tmpObj = result[0];
+						$("#danwei").val(tmpObj.bfullname);
+						$("#danwei").data("orgCode",tmpObj.btypeid);
+						if(backFunc){
+							backFunc(data);
+						}
+					}else{
+						$.mobile.changePage($("#pageBasic"), {
+							 'allowSamePageTransition' : false,
+							 'reloadPage' : false,
+							 transition: 'none'
+						});
+						//树组件内部调用，这里不用刷新了
+						if(pageNum==null){
+							orgTreeObj = new Tree("treeContainer","returnParentDiv","choosedInfoValue","choosedInfoLabel","btypeid","bfullname",true);
+							orgTreeObj.show(result,true,null);
+						}
+						if(backFunc){
+							backFunc(data);
+						}
 					}
 				}
 		    });

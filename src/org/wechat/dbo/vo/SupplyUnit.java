@@ -131,6 +131,61 @@ public class SupplyUnit {
 
 		return list;
 	}
+	
+	/**
+	 * 
+	 * @param dba
+	 * @param name	模糊查询
+	 * @param OperatorID
+	 * @param BranchId
+	 * @param pageNum
+	 * @param itemsInEachPage
+	 * @return
+	 */
+	public String getSupplyUnitInfoByName(DBAccess dba, String name,String BranchId, String OperatorID, int pageNum, int itemsInEachPage) {
+		JSONArray result = new JSONArray();
+		try {
+			// 设置输入参数列表
+			List<InParam> inParamList = new ArrayList<InParam>();
+			inParamList.add(new InParam(1, new Integer(0)));//模糊查询内容
+			inParamList.add(new InParam(2, new Integer(2)));
+			inParamList.add(new InParam(3, "%"+name+"%"));
+			inParamList.add(new InParam(4, OperatorID));
+			inParamList.add(new InParam(5, BranchId));
+			inParamList.add(new InParam(6, new Integer(0)));
+			inParamList.add(new InParam(7, " 1=1 "));
+			inParamList.add(new InParam(8, new Integer(pageNum)));
+			inParamList.add(new InParam(9, new Integer(itemsInEachPage)));
+
+			// 设置输出参数列表
+			List<OutParam> outParamList = new ArrayList<OutParam>();
+			outParamList.add(new OutParam(10, java.sql.Types.INTEGER));
+			String curSql = "exec FN_TCGetBtypeList @nSearchType=?,@custom1=?,@custom2=?,@OperatorID=?,@Branchid=?,@bDisplayStop=?,@where=?,@PageNo=?,@PageSize=?,@itemCount=? output";
+			List<Object> resultList = dba.executeProcedure(curSql, inParamList, outParamList, 10, true);
+			ResultSet rs = (ResultSet) resultList.get(0);
+			
+			int totalPage = 0;
+			if (resultList.size() > 1) {
+				int itemCount = Integer.parseInt(resultList.get(1).toString());
+				if(itemCount%itemsInEachPage==0){
+					totalPage = itemCount/itemsInEachPage;
+				}else{
+					totalPage = itemCount/itemsInEachPage+1;
+				}
+			}
+
+			List<SupplyUnit> supplyUnitList = resultSetToList(rs,totalPage);
+			result = JSONArray.fromObject(supplyUnitList);
+		} catch (Exception e) {
+			e.printStackTrace();
+			if (dba != null) {
+				dba.close();
+			}
+		}
+		String tmpResult = result.toString();
+		return tmpResult;
+	}
+	
 
 	public String getBtypeid() {
 		return btypeid;
@@ -175,7 +230,8 @@ public class SupplyUnit {
 	public static void main(String args[]) throws Exception {
 		DBAccess dba = new DBAccess(true);
 		SupplyUnit supplyUnit = new SupplyUnit();
-		String result = supplyUnit.getSupplyUnitInfo(dba, 1, "0000100007", DBConst.default_orgnization, DBConst.default_OperatorID, 0, 1, 5);
+		//String result = supplyUnit.getSupplyUnitInfo(dba, 1, "0000100007", DBConst.default_orgnization, DBConst.default_OperatorID, 0, 1, 5);
+		String result = supplyUnit.getSupplyUnitInfoByName(dba, "一", DBConst.default_orgnization,"00002", 1, 5);
 		System.out.println("供货单位：" + result);
 		dba.close();
 	}

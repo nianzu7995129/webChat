@@ -166,6 +166,33 @@ public class BusinessService {
 		}
 		return result;
 	}
+	
+	/**
+	 * 
+	 * @param name	模糊查询
+	 * @param orgCode
+	 * @param OperatorID
+	 * @param pageNum
+	 * @param itemsInEachPage
+	 * @return
+	 * @throws Exception
+	 */
+	public String getSupplyUnitByName(String name, String orgCode, String OperatorID, int pageNum, int itemsInEachPage) throws Exception {
+		SupplyUnit supplyUnit = new SupplyUnit();
+		DBAccess dba = null;
+		String result = "";
+		try {
+			dba = new DBAccess();
+			result = supplyUnit.getSupplyUnitInfoByName(dba, name, orgCode,OperatorID, pageNum, itemsInEachPage);
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		} finally {
+			if (dba != null) {
+				dba.close();
+			}
+		}
+		return result;
+	} 
 
 	/**
 	 * @param orgCode
@@ -292,13 +319,13 @@ public class BusinessService {
 		return result;
 	}
 
-	public String getGoodsPrice(String ptypeid, String OperatorID) throws Exception {
+	public String getGoodsPrice(String ptypeid, String OperatorID,String priceMode) throws Exception {
 		GoodsPrice goodsPrice = new GoodsPrice();
 		DBAccess dba = null;
 		String result = "";
 		try {
 			dba = new DBAccess();
-			result = goodsPrice.getGoodPriceInfo(dba, ptypeid, OperatorID);
+			result = goodsPrice.getGoodPriceInfo(dba, ptypeid, OperatorID,priceMode);
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
 		} finally {
@@ -313,10 +340,11 @@ public class BusinessService {
 	 * @param ktypeid
 	 * @param ptypeid
 	 * @param OperatorID
+	 * @param priceMode 销售订单：SR 采购订单：B
 	 * @return
 	 * @throws Exception
 	 */
-	public String getGoodsInfo(String ktypeid, String ptypeid, String OperatorID) throws Exception {
+	public String getGoodsInfo(String ktypeid, String ptypeid, String OperatorID,String priceMode) throws Exception {
 		GoodsColor goodsColor = new GoodsColor();
 		GoodsSize goodsSize = new GoodsSize();
 		GoodsPrice goodsPrice = new GoodsPrice();
@@ -328,7 +356,7 @@ public class BusinessService {
 			dba = new DBAccess();
 			String color = goodsColor.getGoodsColorInfo(dba, ktypeid, ptypeid);
 			String size = goodsSize.getGoodsSizeInfo(dba, ptypeid);
-			String price = goodsPrice.getGoodPriceInfo(dba, ptypeid, OperatorID);
+			String price = goodsPrice.getGoodPriceInfo(dba, ptypeid, OperatorID,priceMode);
 			jo.put("color", color);
 			jo.put("size", size);
 			jo.put("price", price);

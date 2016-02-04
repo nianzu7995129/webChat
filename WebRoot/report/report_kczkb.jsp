@@ -225,7 +225,7 @@
 					}
 					popType = 5;
 					showLoader();
-					sendForGoodsByNumber(null,null,hideLoader);
+					sendForGoodsByNumber(null,hideLoader);
 				}
 			});
 			
@@ -515,7 +515,7 @@
 		}
 		
 		//根据货号模糊查询，请求后台生成商品数据
-		function sendForGoodsByNumber(goodsCode,pageNum,backFunc){
+		function sendForGoodsByNumber(pageNum,backFunc){
 			var huohao = $("#shangpin").val();
 			var storeHouseID = $("#cangku").val();
 			var requestData = "action=action_goods_bynumer&goodsCode="+huohao+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum=1&itemsInEachPage=5";

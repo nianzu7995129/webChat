@@ -60,7 +60,7 @@ function Tree(container,upLevel,choosedInfoValue,choosedInfoLabel,propId,propNam
 		for(var i=0;i<tmpLen;i++){
 			var tmpResult = resultArr[i];
 			var tmpValue = tmpResult[propId];
-			if(popType==2 || popType==4 || popType==5){//客户（销售订单），供货单位（采购订单），单位（往来账目）， 商品， 以及根据货号模糊查询的商品
+			if(popType==2 || popType==4 || popType==5 || popType==6){//客户（销售订单），供货单位（采购订单），单位（往来账目）， 商品， 根据货号模糊查询的商品，根据单位编号或名称的模糊查询
 				var totalPage = tmpResult["totalPage"];
 				if(totalPage!=0){
 					that.totalPageNum = totalPage;
@@ -235,10 +235,6 @@ function getData(pageOperObj,pageNum){
 				customerData = JSON.stringify(result);
 			}else if(popType==4){
 				goodsData = JSON.stringify(result);
-			}else if(popType==5){
-				goodsDataFromHuohao = JSON.stringify(result);
-			}else{
-				showTip("未知的类型",true);
 			}
 			orgTreeObj.pageNum = pageNum;
 			orgTreeObj.show(result,(curValue==null?true:false),curValue);
@@ -249,7 +245,9 @@ function getData(pageOperObj,pageNum){
 	}else if(popType==4){
 		sendForGoods(curValue,pageNum,backCall);
 	}else if(popType==5){
-		sendForGoodsByNumber(curValue,pageNum,backCall);
+		sendForGoodsByNumber(pageNum,backCall);
+	}else if(popType==6){
+		sendForSupplyunitByName(pageNum,backCall);
 	}else{
 		showTip("未知的类型",true);
 	}

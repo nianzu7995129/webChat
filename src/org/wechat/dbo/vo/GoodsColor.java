@@ -24,7 +24,7 @@ public class GoodsColor {
 			List<GoodsColor> goodsColorList = new ArrayList<GoodsColor>();
 			while (rs.next()) {
 				String fullName = rs.getString("PCFullName");// 颜色名称
-				String userCode = rs.getString("PCUserCode");// 颜色条码
+				String userCode = rs.getString("PCREC");// 颜色条码
 				GoodsColor goodsColor = new GoodsColor();
 				goodsColor.setPCFullName(fullName);
 				goodsColor.setPCUserCode(userCode);

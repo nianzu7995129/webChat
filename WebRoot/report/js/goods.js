@@ -33,13 +33,13 @@ function addGoodsInfo(){
 	var goodsInfo = {
 		"cgddgoodsnumber": $("#cgddgoodsnumber").val(),	//货号
 		"cgddgoodsname": $("#cgddgoodsname").data("orgCode"),		//商品名称（商品编码）
-		"cgddgoodslabel": $("#cgddgoodsname").val()+"&nbsp;数量:"+$("#sum").val()+"&nbsp;金额:"+$("#transaction").val(),	//用于主页面显示商品信息
+		"cgddgoodslabel": $("#cgddgoodsname").val()+"&nbsp;数量:"+$("#sum").val()+"&nbsp;金额:"+doWithPoint($("#transaction").val()),	//用于主页面显示商品信息
 		"cgddgoodscolor": $("#cgddgoodscolor").val(),				//商品颜色
 		"cgddgoodssize": $("#cgddgoodssize").val(),				//商品尺寸
 		"cgddgoodssum": $("#sum").val(),					//商品数量
 		"cgddgoodsprice": singlePrice,				//商品单价
-		"cgddgoodsmoney": $("#money").val(),				//商品金额
-		"cgddgoodstransaction": $("#transaction").val()	//商品成交金额
+		"cgddgoodsmoney": doWithPoint($("#money").val()),				//商品金额
+		"cgddgoodstransaction": doWithPoint($("#transaction").val())	//商品成交金额
     };
 	alreadyChooseGoodsData.goodsList.push(goodsInfo);
 	showGoodsList(alreadyChooseGoodsData);
@@ -90,7 +90,7 @@ function deleteAllGoods(){
 	showGoodsList(alreadyChooseGoodsData);
 }
 
-function validate(oNum){ 
+function validateWithOutPoint(oNum){ 
 	if(!oNum) return false; 
 	var strP=/^\d+(\.\d+)?$/; 
 	if(!strP.test(oNum)) return false; 
@@ -100,4 +100,29 @@ function validate(oNum){
  		return false; 
 	} 
 	return true; 
+}
+
+function validate(oNum){ 
+	if(!oNum) return false; 
+	var strP=/^\d+(\.\d*)?$/; 
+	if(!strP.test(oNum)) return false; 
+	try{ 
+		if(parseFloat(oNum)!=oNum) return false; 
+	}catch(ex){ 
+ 		return false; 
+	} 
+	return true; 
+}
+
+function doWithPoint(curValue){
+	if(curValue==".") return 0;
+	var len = curValue.length;
+	var pos = curValue.lastIndexOf(".");
+	//四种情况，1、小数点在中间，不处理，2、小数点在结尾，则去掉。3、小数点在第一位，则前面补0(校验排除了这种情况)4、只有一个小数点的情况
+	if(pos == len-1){
+		curValue = curValue.substring(0,len-1);
+	}else if(pos==0){
+		curValue = "0"+curValue;
+	}
+	return curValue;
 }

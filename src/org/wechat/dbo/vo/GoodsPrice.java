@@ -17,12 +17,13 @@ public class GoodsPrice {
 	/** 采购价种类标识 */
 	private String PriceTypeID;
 
-	public String getGoodPriceInfo(DBAccess dba, String ptypeid, String OperatorID) {
+	public String getGoodPriceInfo(DBAccess dba, String ptypeid, String OperatorID,String priceMode) {
 		JSONArray result = new JSONArray();
 		try {
-			String sql = "exec FN_FZGetPriceAndDiscount @ptypeid=?,@priceMode=N'B',@searStr=N'%%',@OperatorID=?,@shopid=N'0'";
+			String sql = "exec FN_FZGetPriceAndDiscount @ptypeid=?,@priceMode=?,@searStr=N'%%',@OperatorID=?,@shopid=N'0'";
 			List<Object> paramList = new ArrayList<Object>();
 			paramList.add(ptypeid);
+			paramList.add(priceMode);
 			paramList.add(OperatorID);
 			ResultSet rs = dba.executeQuery(sql, paramList);
 			List<GoodsPrice> goodPriceList = new ArrayList<GoodsPrice>();
@@ -70,7 +71,7 @@ public class GoodsPrice {
 	public static void main(String args[]) throws Exception {
 		DBAccess dba = new DBAccess(true);
 		GoodsPrice goodPrice = new GoodsPrice();
-		String result = goodPrice.getGoodPriceInfo(dba, "00008", DBConst.default_OperatorID);
+		String result = goodPrice.getGoodPriceInfo(dba, "00008", DBConst.default_OperatorID,"SR");
 		System.out.println("商品单价信息：" + result);
 		dba.close();
 	}

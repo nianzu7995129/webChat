@@ -30,7 +30,7 @@ public class DBUtils {
 		inParamList.add(new InParam(2, date));
 		inParamList.add(new InParam(3, ""));
 		inParamList.add(new InParam(4, pcName));
-		inParamList.add(new InParam(5, new Integer(0)));
+		inParamList.add(new InParam(5, new Integer(1)));
 
 		// 设置输出参数列表
 		List<OutParam> outParamList = new ArrayList<OutParam>();
@@ -131,7 +131,7 @@ public class DBUtils {
 			System.out.println("商品细单保存結束");
 			// <<---------------------------------------商品细单信息-----------------------------------------
 			// -----------------------------------------商品尺码信息-----------------------------------------
-			start += 20 * goodsInfoJa.length();
+			start += 21 * goodsInfoJa.length();
 			List<List<InParam>> goodsDetailInfoParamList = insertGoodsDetailInfo(id19, goodsDetailInfoJa.toString(), start);
 			if (mainInfoParamList != null) {
 				for (List<InParam> inParams : goodsDetailInfoParamList) {
@@ -185,6 +185,7 @@ public class DBUtils {
 			ps.close();
 			conn.close();
 		} catch (Exception e) {
+			e.printStackTrace();
 			if (conn != null) {
 				conn.rollback();
 			}
@@ -202,7 +203,7 @@ public class DBUtils {
 		String declareMainInfo = "declare @ps1 dbo.tvpdlyndxorder ";
 		String sqlInsertMainInfo = " insert into @ps1 values (0,?,?,?,?,?,?,N'',?,?,N'',?,N'0',N'',0,N'',?,?,N'0',0,0,0,N'100',N'',N'0',0,N'摘要 ',N'附加说明 ',2,N'',N'',N'',N'',N'',0,N'0',?,0,?,N'0',N'0',N'0',0,0,N'',N'0',N'运输方式 ',N'送货地址 ',N'联系人 ',N'联系电话 ',?) ";
 		String declareGoodsInfo = " declare @ps2 dbo.tvpBakDlyOrder ";
-		String sqlInsertGoodsInfo = " insert into @ps2 values(0,0,?,?,?,?,?,?,?,?,?,?,N'100.00',?,0,N'100',N'0',N'0.00',N'136.80 ',?,?,?,0,N'0.00',?,N'0.00',?,N'0',0,0,N'0',0,? ,0,N'0.00',?,N'',N'',N'0',N'0',N'',0,0,N'',N'',N'',N'',N'',N'',4,N'1',0,? ,N'0',N'0',?,N'0') ";
+		String sqlInsertGoodsInfo = " insert into @ps2 values(0,0,?,?,?,?,?,?,?,?,?,?,N'100.00',?,0,N'100',N'0',N'0.00',?,?,?,?,0,N'0.00',?,N'0.00',?,N'0',0,0,N'0',0,? ,0,N'0.00',?,N'',N'',N'0',N'0',N'',0,0,N'',N'',N'',N'',N'',N'',4,N'1',0,? ,N'0',N'0',?,N'0') ";
 		String declareGoodsDetailInfo = " declare @ps3 dbo.tvpBakDlyOrderDetail ";
 		String sqlInsertGoodsDetailInfo = " insert into @ps3 values(0,?,? ,? ,?,N'0',N'0.00',N'0',N'0.00',?,?,N'0.00',?,? ,N'0',N'0',N'0') ";
 		String sqlDoSave = " exec SaveOrderBill @tvpDlyNdxOrder=@ps1,@tvpBakdlyOrder=@ps2,@tvpBakDlyOrderDetail=@ps3,@Operator=?";
@@ -234,7 +235,7 @@ public class DBUtils {
 		inParamList.add(new InParam(1, id19));
 		inParamList.add(new InParam(2, jo.optString("cgdddate")));
 		inParamList.add(new InParam(3, jo.optString("cgddcode")));
-		inParamList.add(new InParam(4, jo.optInt("ddtype"))); // 订单类型，销售订单为8，采购订单为7
+		inParamList.add(new InParam(4, new Integer(jo.optInt("ddtype")))); // 订单类型，销售订单为8，采购订单为7
 		inParamList.add(new InParam(5, jo.optString("cgddsupplyunit")));
 		inParamList.add(new InParam(6, jo.optString("cgddorganization")));
 		inParamList.add(new InParam(7, jo.optString("cgddbrokerage")));
@@ -255,7 +256,7 @@ public class DBUtils {
 		int len = ja.length();
 		List<List<InParam>> inParamsList = new ArrayList<List<InParam>>();
 		for (int i = 0; i < len; i++) {
-			int addedIndex = start + 20 * i;// 20为当前语句需要参数个数
+			int addedIndex = start + 21 * i;// 21为当前语句需要参数个数
 			JSONObject jo = ja.getJSONObject(i);
 			List<InParam> inParams = new ArrayList<InParam>();
 			// 商品数量
@@ -268,6 +269,8 @@ public class DBUtils {
 			double sum = cgddgoodssum * cgddgoodsprice;
 			String sumStr = new Double(sum).toString();
 			// 输入参数
+			//insert into @p2 values(0,0,?,						 ?,			  ?,			 ?,	 			?,		  ?,		?,		  ?,		?,    ?,  N'100.00', ?,0,N'100',N'0',N'0.00',         		 ?,			?,			?,  		   ?,  0,N'0.00',       ?,   N'0.00',    ?,     N'0',0,0,N'0',0,?  ,0,N'0.00',      ?,    N'',N'',N'0',N'0',N'',0,0,N'',N'',N'',N'',N'',N'',1,N'1',0,? ,N'0',N'0',    ?    ,N'0')
+			//insert into @p2 values(0,0,N'1543140627735185292 ',8,N'0000100001 ',N'0000100001 ',N'0000200001 ',N'00003 ',N'00001 ',N'00002 ',N'00008 ',N'11 ',N'100.00',N'136.80 ',0,N'100',N'0',N'0.00',N'136.80 ',N'136.80 ',N'1504.80 ',N'2015-12-27 ',0,N'0.00',N'136.80 ',N'0.00',N'1504.80 ',N'0',0,0,N'0',0,15 ,0,N'0.00',N'1504.80 ',N'',N'',N'0',N'0',N'',0,0,N'',N'',N'',N'',N'',N'',1,N'1',0,1 ,N'0',N'0',N'136.80 ',N'0')
 			inParams.add(new InParam(1 + addedIndex, id19)); // 第二轮开始为35 20+14+1
 			inParams.add(new InParam(2 + addedIndex, jo.optInt("ddtype"))); // 订单类型，销售订单为8，采购订单为7
 			inParams.add(new InParam(3 + addedIndex, jo.optString("cgddorganization")));
@@ -280,14 +283,15 @@ public class DBUtils {
 			inParams.add(new InParam(10 + addedIndex, cgddgoodssumStr));
 			inParams.add(new InParam(11 + addedIndex, jo.optString("cgddgoodsprice")));
 			inParams.add(new InParam(12 + addedIndex, jo.optString("cgddgoodsprice")));
-			inParams.add(new InParam(13 + addedIndex, sumStr));
-			inParams.add(new InParam(14 + addedIndex, jo.optString("cgdddate")));
-			inParams.add(new InParam(15 + addedIndex, jo.optString("cgddgoodsprice")));
-			inParams.add(new InParam(16 + addedIndex, cgddgoodssumStr));
-			inParams.add(new InParam(17 + addedIndex, jo.optInt("cgddgoodscolor")));
-			inParams.add(new InParam(18 + addedIndex, cgddgoodssumStr));
-			inParams.add(new InParam(19 + addedIndex, jo.optInt("cgddgoodsindex")));//
-			inParams.add(new InParam(20 + addedIndex, jo.optString("cgddgoodsprice")));// 14+20
+			inParams.add(new InParam(13 + addedIndex, jo.optString("cgddgoodsprice")));
+			inParams.add(new InParam(14 + addedIndex, sumStr));
+			inParams.add(new InParam(15 + addedIndex, jo.optString("cgdddate")));
+			inParams.add(new InParam(16 + addedIndex, jo.optString("cgddgoodsprice")));
+			inParams.add(new InParam(17 + addedIndex, sumStr));
+			inParams.add(new InParam(18 + addedIndex, jo.optInt("cgddgoodscolor")));
+			inParams.add(new InParam(19 + addedIndex, sumStr));
+			inParams.add(new InParam(20 + addedIndex, jo.optInt("cgddgoodsindex")));//
+			inParams.add(new InParam(21 + addedIndex, jo.optString("cgddgoodsprice")));// 14+20
 			inParamsList.add(inParams);
 		}
 		return inParamsList;
@@ -312,13 +316,13 @@ public class DBUtils {
 			String sumStr = new Double(sum).toString();
 			// 输入参数
 			inParams.add(new InParam(1 + addedIndex, id19));// 51+1,59+1
-			inParams.add(new InParam(2 + addedIndex, jo.optInt("cgddgoodssize")));
-			inParams.add(new InParam(3 + addedIndex, jo.optInt("cgddgoodscolor")));
+			inParams.add(new InParam(2 + addedIndex, new Integer(jo.optInt("cgddgoodssize"))));
+			inParams.add(new InParam(3 + addedIndex, new Integer(jo.optInt("cgddgoodscolor"))));
 			inParams.add(new InParam(4 + addedIndex, cgddgoodssumStr));
 			inParams.add(new InParam(5 + addedIndex, sumStr));
 			inParams.add(new InParam(6 + addedIndex, sumStr));
 			inParams.add(new InParam(7 + addedIndex, sumStr));
-			inParams.add(new InParam(8 + addedIndex, jo.optInt("cgddgoodsindex")));// 59
+			inParams.add(new InParam(8 + addedIndex, new Integer(jo.optInt("cgddgoodsindex"))));// 59
 			inParamsList.add(inParams);
 		}
 		return inParamsList;
@@ -353,11 +357,11 @@ public class DBUtils {
 			ResultSet rs = dba.executeQuery(sql, paramList);
 			while (rs.next()) {
 				jo.put("btypeid", rs.getString("btypeid"));// 单位编号，用于查单位全名
-				jo.put("ArTotal00", rs.getString("ArTotal00"));// 期初应收
-				jo.put("ArTotalAdd", rs.getString("ArTotalAdd"));// 应收增加
-				jo.put("ArTotalDec", rs.getString("ArTotalDec"));// 应收减少
-				jo.put("ArTotalYS", rs.getString("ArTotalYS"));// 预收余额
-				jo.put("ArTotal", rs.getString("ArTotal"));// 应收余额
+				jo.put("ArTotal00", rs.getDouble("ArTotal00"));// 期初应收
+				jo.put("ArTotalAdd", rs.getDouble("ArTotalAdd"));// 应收增加
+				jo.put("ArTotalDec", rs.getDouble("ArTotalDec"));// 应收减少
+				jo.put("ArTotalYS", rs.getDouble("ArTotalYS"));// 预收余额
+				jo.put("ArTotal", rs.getDouble("ArTotal"));// 应收余额
 			}
 			// 查询应付信息
 			sql = "exec FZDISPArApMSD @cMode=N'AP',@Btypeid=?,@BranchId=?,@OperatorId=?,@includeYSYF=? ,@Filter=?";
@@ -371,11 +375,11 @@ public class DBUtils {
 			rs = dba.executeQuery(sql, paramList);
 			while (rs.next()) {
 				jo.put("btypeid", rs.getString("btypeid"));// 单位编号，用于查单位全名
-				jo.put("APTotal00", rs.getString("APTotal00"));// 期初应付
-				jo.put("ApTotalAdd", rs.getString("ApTotalAdd"));// 应付增加
-				jo.put("ApTotalDec", rs.getString("ApTotalDec"));// 应付减少
-				jo.put("APTotalYF", rs.getString("APTotalYF"));// 预付余额
-				jo.put("APTotal", rs.getString("APTotal"));// 应付余额
+				jo.put("APTotal00", rs.getDouble("APTotal00"));// 期初应付
+				jo.put("ApTotalAdd", rs.getDouble("ApTotalAdd"));// 应付增加
+				jo.put("ApTotalDec", rs.getDouble("ApTotalDec"));// 应付减少
+				jo.put("APTotalYF", rs.getDouble("APTotalYF"));// 预付余额
+				jo.put("APTotal", rs.getDouble("APTotal"));// 应付余额
 			}
 			// 查询单位名称
 			sql = "exec xw_GetBasicData @cMode='B',@nUpdateTag=0";
@@ -463,12 +467,12 @@ public class DBUtils {
 			while (rs.next()) {
 				String ptypeid = rs.getString("ptypeid");// 商品标识
 				int Sqty = rs.getInt("Sqty");// 销售数量
-				int CostTotal = rs.getInt("CostTotal");// 成本金额
-				int Profittotal = rs.getInt("Profittotal");// 毛利额
+				double CostTotal = rs.getDouble("CostTotal");// 成本金额
+				double Profittotal = rs.getDouble("Profittotal");// 毛利额
 				jo.put("ptypeid", ptypeid);// 商品标识
 				jo.put("Sqty", new Integer(Sqty));// 销售数量
-				jo.put("CostTotal", new Integer(CostTotal));// 成本金额
-				jo.put("Profittotal", new Integer(Profittotal));// 毛利额
+				jo.put("CostTotal", new Double(CostTotal));// 成本金额
+				jo.put("Profittotal", new Double(Profittotal));// 毛利额
 			}
 			result = jo.toString();
 		} catch (Exception e) {

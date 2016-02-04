@@ -52,7 +52,9 @@
 					</div>
 					<div class="ui-field-contain">
 						<label for="gonghuodanwei">供货单位：</label>
-						<a id="gonghuodanweiHref" data-rel="popup" data-transition="pop" ><input readonly="readonly" type="text" name="gonghuodanwei" id="gonghuodanwei"></a>
+						<!-- <a id="gonghuodanweiHref" data-rel="popup" data-transition="pop" > -->
+						<input type="text" name="gonghuodanwei" id="gonghuodanwei">
+						<!-- </a> -->
 					</div>
 					<div class="ui-field-contain">
 						<label for="shouhuocangku">收货仓库：</label>
@@ -174,7 +176,7 @@
 		var cgddcode = null;	//机构编码 （用于判断机构编码是否改变）
 		var orgTreeObj;	//树组件
 		var treeData = null;//机构数据
-		var popType=0;//用于区分当前弹出树组件的使用对象，0：默认未使用，1：机构，2：供货单位（客户），3：结算机构，4：商品，5：货号搜索得到的商品
+		var popType=0;//用于区分当前弹出树组件的使用对象，0：默认未使用，1：机构，2：供货单位（客户），3：结算机构，4：商品，5：货号搜索得到的商品，6：单位名称搜到的单位
 		
 		//如下数据，当机构改变时需要清空
 		var customerData = null;//供货单位数据
@@ -249,6 +251,7 @@
 			});
 			
 			//生成供货单位
+			/*
 			$("#gonghuodanweiHref").bind("click",function(){
 				var organization =  $("#jigou").data("orgCode");
 				if(typeof(organization) == "undefined" || organization==null || organization.length==0){
@@ -258,6 +261,30 @@
 				popType = 2;
 				showLoader();
 				sendForSupplyUnit();
+			});
+			*/
+			
+			$("#gonghuodanwei").bind("keydown",function(event){
+				if(event.which==13){
+					var organization = $("#jigou").data("orgCode");
+					var tmp = $("#gonghuodanwei").val();
+					if(tmp==null || tmp.length==0){
+						if(typeof(organization) == "undefined" || organization==null || organization.length==0){
+							showTip("请先选择机构",true);
+							return;
+						}
+						popType = 2;
+						sendForSupplyUnit();
+						return;
+					}
+					if(typeof(organization) == "undefined" || organization==null || organization.length==0){
+						showTip("请先选择机构",true);
+						return;
+					}
+					popType = 6;
+					showLoader();
+					sendForSupplyunitByName(null,hideLoader);
+				}
 			});
 			
 			//返回机构，客户的选择值
@@ -269,7 +296,7 @@
 					var content = "";
 					if(popType==1 || popType==3){
 						content = "请选择机构信息";
-					}else if(popType == 2){
+					}else if(popType == 2 || popType == 6){
 						content = "请选择供货单位";
 					}else if(popType == 4 || popType == 5){
 						content = "请选择商品";
@@ -297,7 +324,7 @@
 							deleteAllGoods();							
 						}
 					}
-				}else if(popType==2){
+				}else if(popType==2 || popType==6){
 					$("#gonghuodanwei").val(customerName);
 					$("#gonghuodanwei").data("orgCode",customerCode);
 				}else if(popType==3){
@@ -326,7 +353,7 @@
 					$("#cgddgoodsname").val(customerName);
 					$("#cgddgoodsname").data("orgCode",customerCode);
 				}
-				if(popType==1 || popType==2 || popType==3){
+				if(popType==1 || popType==2 || popType==3 || popType==6){
 					$.mobile.changePage($("#pageHome"), {
 						 'allowSamePageTransition' : false,
 						 'reloadPage' : false,
@@ -384,7 +411,7 @@
 			});
 			
 			$("#returnPageHomeBtn").bind("click",function(){
-				if(popType==1 || popType==2 || popType==3){
+				if(popType==1 || popType==2 || popType==3 || popType==6){
 					$.mobile.changePage($("#pageHome"), {
 						 'allowSamePageTransition' : false,
 						 'reloadPage' : false,
@@ -640,7 +667,7 @@
 					}
 					popType = 5;
 					showLoader();
-					sendForGoodsByNumber(null,null,hideLoader);
+					sendForGoodsByNumber(null,hideLoader);
 				}
 			});
 		});
@@ -956,7 +983,6 @@
 		
 		var shangpincode = null;//商品编码 （用于判断商品编码是否改变）
 		var goodsData = null;//商品信息
-		var goodsDataFromHuohao = null;//根据货号获得的商品信息（只有一级）
 		
 		//增加商品跳转页面
 		$("#addGoodsBtnHref").bind("click",function(){
@@ -1040,7 +1066,7 @@
 		
 		$("#sum").on("input",function(e){
 			var sumValue = $("#sum").val();
-			if(!validate(sumValue)){
+			if(!validateWithOutPoint(sumValue)){
 				showTip("不是合理数字,请重新输入",true);
 				$("#sum").val("");
 			}else{
@@ -1123,7 +1149,7 @@
 			var storeHouseID = $("#shouhuocangku").val();
 			$.ajax({
 				url: contextPath+"/BusinessServlet",
-				data: "action=action_goodsInfo&goodsID="+goodsID+"&storeHouseID="+storeHouseID+"&OperatorID=<%=OperatorID%>",
+				data: "action=action_cgdd_goodsInfo&goodsID="+goodsID+"&storeHouseID="+storeHouseID+"&OperatorID=<%=OperatorID%>",
 				type: "POST",
 				dataType: 'text',
 				timeout: 10000,
@@ -1188,7 +1214,7 @@
 		}
 		
 		//根据货号模糊查询，请求后台生成商品数据
-		function sendForGoodsByNumber(goodsCode,pageNum,backFunc){
+		function sendForGoodsByNumber(pageNum,backFunc){
 			var huohao = $("#cgddgoodsnumber").val();
 			var storeHouseID = $("#shouhuocangku").val();
 			var requestData = "action=action_goods_bynumer&goodsCode="+huohao+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum=1&itemsInEachPage=5";
@@ -1213,7 +1239,6 @@
 						showTip(result,true);
 					}else{
 						$("#treeContainer").empty();
-						goodsData = JSON.stringify(result);
 					}
 					$.mobile.changePage($("#pageBasic"), {
 						 'allowSamePageTransition' : false,
@@ -1227,6 +1252,65 @@
 					}
 					if(backFunc){
 						backFunc(data);
+					}
+				}
+		    });
+		}
+		
+		//根据供货单位编号或名称模糊查询，请求后台生成供货单位数据
+		function sendForSupplyunitByName(pageNum,backFunc){
+			var gonghuodanwei = $("#gonghuodanwei").val();
+			var organization = $("#jigou").data("orgCode");
+			var requestData = "action=action_supplyunit_byname&name="+gonghuodanwei+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum=1&itemsInEachPage=5";
+			if(pageNum!=null){
+				requestData = "action=action_supplyunit_byname&name="+gonghuodanwei+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum="+pageNum+"&itemsInEachPage=5";
+			}
+			$.ajax({
+				url: contextPath+"/BusinessServlet",
+				data: requestData,
+				type: "POST",
+				dataType: 'text',
+				timeout: 10000,
+				async:false,
+				error: function(XMLHttpRequest, textStatus, errorThrown){
+					showTip("请求服务器数据异常!",true);
+					return;
+				},
+				success: function(data){
+					var obj = JSON.parse(data);
+					var result = obj.result;
+					if(obj.isError=="true"){
+						showTip(result,true);
+					}else{
+						$("#treeContainer").empty();
+						customerData = JSON.stringify(result);
+					}
+					if(result.length==0){
+						popType = 0;
+						showTip("未搜索到供货单位",true);
+						return;
+					}else if(result.length==1){
+						popType = 0;
+						var tmpObj = result[0];
+						$("#gonghuodanwei").val(tmpObj.bfullname);
+						$("#gonghuodanwei").data("orgCode",tmpObj.btypeid);
+						if(backFunc){
+							backFunc(data);
+						}
+					}else{
+						$.mobile.changePage($("#pageBasic"), {
+							 'allowSamePageTransition' : false,
+							 'reloadPage' : false,
+							 transition: 'none'
+						});
+						//树组件内部调用，这里不用刷新了
+						if(pageNum==null){
+							orgTreeObj = new Tree("treeContainer","returnParentDiv","choosedInfoValue","choosedInfoLabel","btypeid","bfullname",true);
+							orgTreeObj.show(result,true,null);
+						}
+						if(backFunc){
+							backFunc(data);
+						}
 					}
 				}
 		    });
