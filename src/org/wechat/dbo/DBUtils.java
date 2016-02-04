@@ -83,11 +83,10 @@ public class DBUtils {
 		DBAccess dba = null;
 		Connection conn = null;
 		try {
-			dba = new DBAccess(true);
+			dba = new DBAccess();
 			conn = dba.getConn();
 			PreparedStatement ps = null;
-			conn.setAutoCommit(false);
-			String bigSql = genSaveOrderBigSql(mainInfoJo, goodsInfoJa, goodsDetailInfoJa);
+			String bigSql = genSaveOrderBigSql(mainInfoJo,goodsInfoJa,goodsDetailInfoJa);
 			System.out.println(bigSql);
 			// -----------------------------------------主表信息-----------------------------------------
 			ps = conn.prepareStatement(bigSql);
@@ -120,6 +119,7 @@ public class DBUtils {
 							int index = inParam.getIndex();
 							Object value = inParam.getValue();
 							if (value instanceof Integer) {
+								System.out.println("intValue>>"+((Integer) value).intValue());
 								ps.setInt(index, ((Integer) value).intValue());
 							} else if (value instanceof String) {
 								ps.setString(index, (String) value);
@@ -140,6 +140,7 @@ public class DBUtils {
 							int index = inParam.getIndex();
 							Object value = inParam.getValue();
 							if (value instanceof Integer) {
+								System.out.println("intValue>>"+((Integer) value).intValue());
 								ps.setInt(index, ((Integer) value).intValue());
 							} else if (value instanceof String) {
 								ps.setString(index, (String) value);
@@ -168,26 +169,88 @@ public class DBUtils {
 					}
 				}
 			}
-
+			
 			ps.executeUpdate();
 			boolean hasMoreResult = ps.getMoreResults();
 			ResultSet rs = ps.getResultSet();
 			if (hasMoreResult && rs != null && rs.next()) {
 				result = rs.getString("ErrorMessage");
-				conn.rollback();
-				conn.setAutoCommit(true);
-			} else {
-				conn.commit();
-				conn.setAutoCommit(true);
-				conn.close();
 			}
 			// <<---------------------------------------保存订单-----------------------------------------
+			
+			
+			if("保存成功".equals(result)){
+				int ddtype = mainInfoJo.optInt("ddtype");
+				if(ddtype==8){//订单类型，销售订单为8，采购订单为7
+					
+					//保存单据最大值
+					String cgdddate = mainInfoJo.optString("cgdddate");
+					List<InParam> inParamListForMaxSql = new ArrayList<InParam>();
+					inParamListForMaxSql.add(new InParam(1, cgdddate));
+					String maxSql = "exec FZModifyVchnumber @nVchtype=8,@Date=?";
+					ps = conn.prepareStatement(maxSql);
+					if (inParamListForMaxSql != null) {
+						for (InParam inParam : inParamListForMaxSql) {
+							int index = inParam.getIndex();
+							Object value = inParam.getValue();
+							if (value instanceof Integer) {
+								ps.setInt(index, ((Integer) value).intValue());
+							} else if (value instanceof String) {
+								ps.setString(index, (String) value);
+							}
+						}
+					}
+					ps.execute();
+					
+					//判断是否需要审核
+					List<InParam> inParamListForCheck = new ArrayList<InParam>();
+					inParamListForCheck.add(new InParam(1, id19));
+					inParamListForCheck.add(new InParam(2, DBConst.default_OperatorID));
+					String checkSql = "exec FN_BillAudtingCheckReason_Order @vchcode=? ,@BillIndexType=0,@OperatorID=?";
+					ps = conn.prepareStatement(checkSql);
+					if (inParamListForCheck != null) {
+						for (InParam inParam : inParamListForCheck) {
+							int index = inParam.getIndex();
+							Object value = inParam.getValue();
+							if (value instanceof Integer) {
+								ps.setInt(index, ((Integer) value).intValue());
+							} else if (value instanceof String) {
+								ps.setString(index, (String) value);
+							}
+						}
+					}
+					rs = ps.executeQuery();
+					if(rs.next()){
+						String reason = "单据金额高于等于100元审核";
+						if(reason.equals(rs.getString("Reason"))){
+							// 形成待审单
+							List<InParam> inParamListForAdd= new ArrayList<InParam>();
+							inParamListForAdd.add(new InParam(1, id19));
+							inParamListForAdd.add(new InParam(2, DBConst.default_OperatorID));
+							String addSql = "exec FN_AddDataToAuditingBill @VchCode=? ,@BillIndexType=0,@OperatorETypeID=?,@tbName=N'DlyNdxOrder'";
+							ps = conn.prepareStatement(addSql);
+							if (inParamListForCheck != null) {
+								for (InParam inParam : inParamListForAdd) {
+									int index = inParam.getIndex();
+									Object value = inParam.getValue();
+									if (value instanceof Integer) {
+										ps.setInt(index, ((Integer) value).intValue());
+									} else if (value instanceof String) {
+										ps.setString(index, (String) value);
+									}
+								}
+							}
+							ps.execute();
+						}
+					}
+				}
+			}
 			ps.close();
 			conn.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 			if (conn != null) {
-				conn.rollback();
+				conn.close();
 			}
 			result = e.getMessage();
 			throw new Exception(result);
@@ -203,11 +266,17 @@ public class DBUtils {
 		String declareMainInfo = "declare @ps1 dbo.tvpdlyndxorder ";
 		String sqlInsertMainInfo = " insert into @ps1 values (0,?,?,?,?,?,?,N'',?,?,N'',?,N'0',N'',0,N'',?,?,N'0',0,0,0,N'100',N'',N'0',0,N'摘要 ',N'附加说明 ',2,N'',N'',N'',N'',N'',0,N'0',?,0,?,N'0',N'0',N'0',0,0,N'',N'0',N'运输方式 ',N'送货地址 ',N'联系人 ',N'联系电话 ',?) ";
 		String declareGoodsInfo = " declare @ps2 dbo.tvpBakDlyOrder ";
-		String sqlInsertGoodsInfo = " insert into @ps2 values(0,0,?,?,?,?,?,?,?,?,?,?,N'100.00',?,0,N'100',N'0',N'0.00',?,?,?,?,0,N'0.00',?,N'0.00',?,N'0',0,0,N'0',0,? ,0,N'0.00',?,N'',N'',N'0',N'0',N'',0,0,N'',N'',N'',N'',N'',N'',4,N'1',0,? ,N'0',N'0',?,N'0') ";
+		String sqlInsertGoodsInfo = "";
+		int ddtype = mainInfoJo.optInt("ddtype");
+		if(ddtype==8){//订单类型，销售订单为8，采购订单为7
+			sqlInsertGoodsInfo = " insert into @ps2 values(0,0,?,?,?,?,?,?,?,?,?,?,N'100.00',?,0,N'100',N'0',N'0.00',?,?,?,?,0,N'0.00',?,N'0.00',?,N'0',0,0,N'0',0,? ,0,N'0.00',?,N'',N'',N'0',N'0',N'',0,0,N'',N'',N'',N'',N'',N'',1,N'1',0,? ,N'0',N'0',?,N'0') ";//倒数第8个有差别，销售订单为1,
+		}else{
+			sqlInsertGoodsInfo = " insert into @ps2 values(0,0,?,?,?,?,?,?,?,?,?,?,N'100.00',?,0,N'100',N'0',N'0.00',?,?,?,?,0,N'0.00',?,N'0.00',?,N'0',0,0,N'0',0,? ,0,N'0.00',?,N'',N'',N'0',N'0',N'',0,0,N'',N'',N'',N'',N'',N'',4,N'1',0,? ,N'0',N'0',?,N'0') ";//倒数第8个有差别，采购订单为4,
+		}
 		String declareGoodsDetailInfo = " declare @ps3 dbo.tvpBakDlyOrderDetail ";
-		String sqlInsertGoodsDetailInfo = " insert into @ps3 values(0,?,? ,? ,?,N'0',N'0.00',N'0',N'0.00',?,?,N'0.00',?,? ,N'0',N'0',N'0') ";
-		String sqlDoSave = " exec SaveOrderBill @tvpDlyNdxOrder=@ps1,@tvpBakdlyOrder=@ps2,@tvpBakDlyOrderDetail=@ps3,@Operator=?";
-
+		String sqlInsertGoodsDetailInfo = " insert into @ps3 values(0,?,?,?,?,N'0',N'0.00',N'0',N'0.00',?,?,N'0.00',?,? ,N'0',N'0',N'0') ";
+		String sqlDoSave = " exec SaveOrderBill @tvpDlyNdxOrder=@ps1,@tvpBakdlyOrder=@ps2,@tvpBakDlyOrderDetail=@ps3,@Operator=? ";
+		
 		StringBuffer bigSql = new StringBuffer();
 		bigSql.append(declareMainInfo);// 声明主表临时表
 		bigSql.append(sqlInsertMainInfo);// 主表插入语句
@@ -230,12 +299,11 @@ public class DBUtils {
 
 	private static List<List<InParam>> insertMainInfo(String id19, String cgddInfo) throws Exception {
 		JSONObject jo = new JSONObject(cgddInfo);
-		// String sql = "declare @pstep1 dbo.tvpdlyndxorder insert into @pstep1 values (0,?,N'2015-12-28 ',N'CGDD-2015-12-28-0002 ',7,N'0000100001 ',N'0000100001 ',N'',N'00004 ',N'00001 ',N'',N'00003 ',N'0',N'',0,N'',N'00002 ',N'2015-12-31 ',N'0',0,0,0,N'100',N'',N'0',0,N'摘要 ',N'附加说明 ',2,N'',N'',N'',N'',N'',0,N'0',N'0000100001 ',0,N'11 ',N'0',N'0',N'0',0,0,N'',N'0',N'运输方式 ',N'送货地址 ',N'联系人 ',N'联系电话 ','2015-12-28 22:05:00 ')";
 		List<InParam> inParamList = new ArrayList<InParam>();
 		inParamList.add(new InParam(1, id19));
 		inParamList.add(new InParam(2, jo.optString("cgdddate")));
 		inParamList.add(new InParam(3, jo.optString("cgddcode")));
-		inParamList.add(new InParam(4, new Integer(jo.optInt("ddtype")))); // 订单类型，销售订单为8，采购订单为7
+		inParamList.add(new InParam(4, jo.optInt("ddtype"))); // 订单类型，销售订单为8，采购订单为7
 		inParamList.add(new InParam(5, jo.optString("cgddsupplyunit")));
 		inParamList.add(new InParam(6, jo.optString("cgddorganization")));
 		inParamList.add(new InParam(7, jo.optString("cgddbrokerage")));
@@ -243,8 +311,8 @@ public class DBUtils {
 		inParamList.add(new InParam(9, jo.optString("cgdddepartment")));
 		inParamList.add(new InParam(10, jo.optString("cgddoperatorid")));
 		inParamList.add(new InParam(11, jo.optString("cgddsendgoodsdate")));
-		inParamList.add(new InParam(12, jo.optString("cgddcloseorganization")));
-		inParamList.add(new InParam(13, jo.optString("cgddgoodstotalsum")));
+		inParamList.add(new InParam(12, jo.optString("cgddcloseorganization")));//采购订单有值，销售订单无值
+		inParamList.add(new InParam(13, jo.optInt("cgddgoodstotalsum")));
 		inParamList.add(new InParam(14, getCurrDate()));// 制单日期
 		List<List<InParam>> list = new ArrayList<List<InParam>>();
 		list.add(inParamList);
@@ -271,25 +339,39 @@ public class DBUtils {
 			// 输入参数
 			//insert into @p2 values(0,0,?,						 ?,			  ?,			 ?,	 			?,		  ?,		?,		  ?,		?,    ?,  N'100.00', ?,0,N'100',N'0',N'0.00',         		 ?,			?,			?,  		   ?,  0,N'0.00',       ?,   N'0.00',    ?,     N'0',0,0,N'0',0,?  ,0,N'0.00',      ?,    N'',N'',N'0',N'0',N'',0,0,N'',N'',N'',N'',N'',N'',1,N'1',0,? ,N'0',N'0',    ?    ,N'0')
 			//insert into @p2 values(0,0,N'1543140627735185292 ',8,N'0000100001 ',N'0000100001 ',N'0000200001 ',N'00003 ',N'00001 ',N'00002 ',N'00008 ',N'11 ',N'100.00',N'136.80 ',0,N'100',N'0',N'0.00',N'136.80 ',N'136.80 ',N'1504.80 ',N'2015-12-27 ',0,N'0.00',N'136.80 ',N'0.00',N'1504.80 ',N'0',0,0,N'0',0,15 ,0,N'0.00',N'1504.80 ',N'',N'',N'0',N'0',N'',0,0,N'',N'',N'',N'',N'',N'',1,N'1',0,1 ,N'0',N'0',N'136.80 ',N'0')
+			System.out.println("id19>>"+id19);
 			inParams.add(new InParam(1 + addedIndex, id19)); // 第二轮开始为35 20+14+1
+			System.out.println("ddtype>>"+jo.optInt("ddtype"));
 			inParams.add(new InParam(2 + addedIndex, jo.optInt("ddtype"))); // 订单类型，销售订单为8，采购订单为7
+			System.out.println("cgddorganization>>"+jo.optString("cgddorganization"));
 			inParams.add(new InParam(3 + addedIndex, jo.optString("cgddorganization")));
 			inParams.add(new InParam(4 + addedIndex, jo.optString("cgddorganization")));
+			System.out.println("cgddsupplyunit>>"+jo.optString("cgddsupplyunit"));
 			inParams.add(new InParam(5 + addedIndex, jo.optString("cgddsupplyunit")));
+			System.out.println("cgddbrokerage>>"+jo.optString("cgddbrokerage"));
 			inParams.add(new InParam(6 + addedIndex, jo.optString("cgddbrokerage")));
+			System.out.println("cgddreceivestorehouse>>"+jo.optString("cgddreceivestorehouse"));
 			inParams.add(new InParam(7 + addedIndex, jo.optString("cgddreceivestorehouse")));
+			System.out.println("cgdddepartment>>"+jo.optString("cgdddepartment"));
 			inParams.add(new InParam(8 + addedIndex, jo.optString("cgdddepartment")));
+			System.out.println("cgddgoodscode>>"+jo.optString("cgddgoodscode"));
 			inParams.add(new InParam(9 + addedIndex, jo.optString("cgddgoodscode")));
+			System.out.println("cgddgoodssumStr>>"+cgddgoodssumStr);
 			inParams.add(new InParam(10 + addedIndex, cgddgoodssumStr));
 			inParams.add(new InParam(11 + addedIndex, jo.optString("cgddgoodsprice")));
+			System.out.println("cgddgoodsprice>>"+jo.optString("cgddgoodsprice"));
 			inParams.add(new InParam(12 + addedIndex, jo.optString("cgddgoodsprice")));
 			inParams.add(new InParam(13 + addedIndex, jo.optString("cgddgoodsprice")));
+			System.out.println("sumStr>>"+sumStr);
 			inParams.add(new InParam(14 + addedIndex, sumStr));
+			System.out.println("cgdddate>>"+jo.optString("cgdddate"));
 			inParams.add(new InParam(15 + addedIndex, jo.optString("cgdddate")));
 			inParams.add(new InParam(16 + addedIndex, jo.optString("cgddgoodsprice")));
 			inParams.add(new InParam(17 + addedIndex, sumStr));
+			System.out.println("cgddgoodscolor>>"+jo.optInt("cgddgoodscolor"));
 			inParams.add(new InParam(18 + addedIndex, jo.optInt("cgddgoodscolor")));
 			inParams.add(new InParam(19 + addedIndex, sumStr));
+			System.out.println("cgddgoodsindex>>"+jo.optInt("cgddgoodsindex"));
 			inParams.add(new InParam(20 + addedIndex, jo.optInt("cgddgoodsindex")));//
 			inParams.add(new InParam(21 + addedIndex, jo.optString("cgddgoodsprice")));// 14+20
 			inParamsList.add(inParams);
@@ -315,13 +397,20 @@ public class DBUtils {
 			double sum = cgddgoodssum * cgddgoodsprice;
 			String sumStr = new Double(sum).toString();
 			// 输入参数
+			// insert into @p3 values(0,?					   ,? ,?  , ?    ,N'0',N'0.00',N'0',N'0.00',N'1504.80 ',N'1504.80 ',N'0.00',N'1504.80 ',1 ,N'0',N'0',N'0')
+			// insert into @p3 values(0,N'1543140627735185292 ',1 ,15 ,N'11 ',N'0',N'0.00',N'0',N'0.00',N'1504.80 ',N'1504.80 ',N'0.00',N'1504.80 ',1 ,N'0',N'0',N'0')
 			inParams.add(new InParam(1 + addedIndex, id19));// 51+1,59+1
-			inParams.add(new InParam(2 + addedIndex, new Integer(jo.optInt("cgddgoodssize"))));
-			inParams.add(new InParam(3 + addedIndex, new Integer(jo.optInt("cgddgoodscolor"))));
+			System.out.println("size>>>>"+jo.optInt("cgddgoodssize"));
+			inParams.add(new InParam(2 + addedIndex, jo.optInt("cgddgoodssize")));
+			System.out.println("color>>>>"+jo.optInt("cgddgoodscolor"));
+			inParams.add(new InParam(3 + addedIndex, jo.optInt("cgddgoodscolor")));
+			System.out.println("cgddgoodssumStr>>>>"+cgddgoodssumStr);
 			inParams.add(new InParam(4 + addedIndex, cgddgoodssumStr));
+			System.out.println("sumStr>>>>"+sumStr);
 			inParams.add(new InParam(5 + addedIndex, sumStr));
 			inParams.add(new InParam(6 + addedIndex, sumStr));
 			inParams.add(new InParam(7 + addedIndex, sumStr));
+			System.out.println("index>>>>"+jo.optInt("cgddgoodsindex"));
 			inParams.add(new InParam(8 + addedIndex, new Integer(jo.optInt("cgddgoodsindex"))));// 59
 			inParamsList.add(inParams);
 		}
@@ -488,27 +577,12 @@ public class DBUtils {
 
 	// <<------------------------------------商品销售分析表----------------------------------
 	public static void main(String args[]) throws Exception {
-		DBAccess dba = new DBAccess(true);
-		String cgdd = DBUtils.genCGDD(dba, "2017-12-29", "127.0.0.1", 7);
-		System.out.println("采购订单编号：" + cgdd);
-		String exist = DBUtils.CGDDisExist(dba, cgdd);
-		System.out.println("采购订单编号是否重复：" + exist);
-		dba.close();
-		// 商品主信息假数据----------------------------------------------------------
-		/*
-		 * String id19 = "" + Math.abs(new Random().nextLong()); JSONObject mainInfoJo = new JSONObject(); mainInfoJo.put("cgddId", id19);// 1 mainInfoJo.put("cgdddate", "2016-1-25");// 2 mainInfoJo.put("cgddcode", "CGDD-2016-1-25-0002");// 3 mainInfoJo.put("ddtype", 7);// 4 //类型，销售订单值为8，采购订单值为7 mainInfoJo.put("cgddsupplyunit", DBConst.default_supplyunit);// 5 mainInfoJo.put("cgddorganization", DBConst.default_orgnization);// 6 mainInfoJo.put("cgddbrokerage", DBConst.default_BrokerageID);// 7 mainInfoJo.put("cgddreceivestorehouse", DBConst.default_receivestorehouse);// 8 mainInfoJo.put("cgdddepartment", DBConst.default_department);// 9 mainInfoJo.put("cgddoperatorid", DBConst.default_OperatorID);// 10 mainInfoJo.put("cgddsendgoodsdate", DBConst.default_sendGoodsDate);// 11 mainInfoJo.put("cgddcloseorganization", DBConst.default_closeorgnization);// 12 //如果为销售订单则不需要结算结构 mainInfoJo.put("cgddgoodstotalsum", DBConst.default_goodstotalsum);// 13 // 商品记录假数据---------------------------------------------------------- JSONObject goodsInfoJo1 = new JSONObject(); goodsInfoJo1.put("cgddId", "" + id19);// 1 goodsInfoJo1.put("ddtype", 7);// 2 //类型，销售订单值为8，采购订单值为7 goodsInfoJo1.put("cgddorganization", DBConst.default_orgnization);// 3 goodsInfoJo1.put("cgddsupplyunit", DBConst.default_supplyunit);// 4 goodsInfoJo1.put("cgddbrokerage", DBConst.default_BrokerageID);// 5 goodsInfoJo1.put("cgddreceivestorehouse", DBConst.default_receivestorehouse);// 6 goodsInfoJo1.put("cgdddepartment", DBConst.default_department);// 7 goodsInfoJo1.put("cgddgoodscode", DBConst.default_goodscode);// 8 goodsInfoJo1.put("cgddgoodssum", DBConst.default_goodssum);// 9 goodsInfoJo1.put("cgddgoodsprice", DBConst.default_goodsprice);// 10 goodsInfoJo1.put("cgdddate", "2016-1-25");// 11 goodsInfoJo1.put("cgddgoodscolor", 15);// 12 goodsInfoJo1.put("cgddgoodsindex", 1);// 13 JSONObject goodsInfoJo2 = new JSONObject(); goodsInfoJo2.put("cgddId", "" + id19);// 1 goodsInfoJo1.put("ddtype", 7);// 2
-		 * //类型，销售订单值为8，采购订单值为7 goodsInfoJo2.put("cgddorganization", DBConst.default_orgnization);// 3 goodsInfoJo2.put("cgddsupplyunit", DBConst.default_supplyunit);// 4 goodsInfoJo2.put("cgddbrokerage", DBConst.default_BrokerageID);// 5 goodsInfoJo2.put("cgddreceivestorehouse", DBConst.default_receivestorehouse);// 6 goodsInfoJo2.put("cgdddepartment", DBConst.default_department);// 7 goodsInfoJo2.put("cgddgoodscode", DBConst.default_goodscode);// 8 goodsInfoJo2.put("cgddgoodssum", DBConst.default_goodssum);// 9 goodsInfoJo2.put("cgddgoodsprice", DBConst.default_goodsprice);// 10 goodsInfoJo2.put("cgdddate", "2016-1-25");// 11 goodsInfoJo2.put("cgddgoodscolor", 15);// 12 goodsInfoJo2.put("cgddgoodsindex", 2);// 13 JSONArray goodsInfoJa = new JSONArray(); goodsInfoJa.put(goodsInfoJo1); //goodsInfoJa.put(goodsInfoJo2); // 商品尺寸明细假数据---------------------------------------------------------- JSONObject goodsDetailInfoJo1 = new JSONObject(); goodsDetailInfoJo1.put("cgddId", "" + id19);// 1 goodsDetailInfoJo1.put("cgddgoodssize", DBConst.default_goodssize);// 2 goodsDetailInfoJo1.put("cgddgoodscolor", 15);// 3 goodsDetailInfoJo1.put("cgddgoodssum", DBConst.default_goodssum);// 4 goodsDetailInfoJo1.put("cgddgoodsprice", DBConst.default_goodsprice);// 5 goodsDetailInfoJo1.put("cgddgoodsindex", 1);// 6 JSONObject goodsDetailInfoJo2 = new JSONObject(); goodsDetailInfoJo2.put("cgddId", "" + id19);// 1 goodsDetailInfoJo2.put("cgddgoodssize", DBConst.default_goodssize + 1);// 2 goodsDetailInfoJo2.put("cgddgoodscolor", 15);// 3 goodsDetailInfoJo2.put("cgddgoodssum", DBConst.default_goodssum);// 4 goodsDetailInfoJo2.put("cgddgoodsprice", DBConst.default_goodsprice);// 5 goodsDetailInfoJo2.put("cgddgoodsindex", 2);// 6 JSONArray goodsDetailInfoJa = new JSONArray(); goodsDetailInfoJa.put(goodsDetailInfoJo1); //goodsDetailInfoJa.put(goodsDetailInfoJo2); System.out.println(id19);
-		 */
-		/*
-		 * String cgddInfo= "{\"cgdddate\":\"2016-01-15\",\"cgddcode\":\"CGDD-2016-01-15-0001\",\"ddtype\":7,\"cgddsupplyunit\":\"0000100001\",\"cgddorganization\":\"0000100001\",\"cgddbrokerage\":\"00001\",\"cgddreceivestorehouse\":\"00001\",\"cgdddepartment\":\"00001\",\"cgddoperatorid\":\"00002\",\"cgddsendgoodsdate\":\"2016-01-09\",\"cgddcloseorganization\":\"0000100001\",\"cgddgoodstotalsum\":3}"; String goodsInfo = "[{\"ddtype\":7,\"cgddorganization\":\"0000100001\",\"cgddsupplyunit\":\"0000100001\",\"cgddbrokerage\":\"00001\",\"cgddreceivestorehouse\":\"00001\",\"cgdddepartment\":\"00001\",\"cgdddate\":\"2016-01-15\",\"cgddgoodscode\":\"00001\",\"cgddgoodssum\":\"3\",\"cgddgoodsprice\":\"10\",\"cgddgoodscolor\":\"\",\"cgddgoodsindex\":1}]"; String goodsDetailInfo = "[{\"cgddgoodssize\":\"1\",\"cgddgoodssum\":\"3\",\"cgddgoodsprice\":\"10\",\"cgddgoodscolor\":\"\",\"cgddgoodsindex\":1}]"; submitCGDD(cgddInfo, goodsInfo, goodsDetailInfo);
-		 */
-
-		/*
-		 * String result = genQueryResultForWLZMB("00003", DBConst.default_orgnization, DBConst.default_OperatorID, 1, "0"); System.out.println("往来账目表查询结果：" + result);
-		 */
 		
-		String result = genQueryResultForSPXSFXB("00005", "2016-01-01", "2016-01-05", "00001", "00001", "0000100001","00002");
-		System.out.println(result);
+		 String cgddInfo= "{\"cgdddate\":\"2016-02-05\",\"cgddcode\":\"XSDD-2016-02-05-0018\",\"ddtype\":8,\"cgddsupplyunit\":\"0000200001\",\"cgddorganization\":\"0000100001\",\"cgddbrokerage\":\"00001\",\"cgddreceivestorehouse\":\"00001\",\"cgdddepartment\":\"00001\",\"cgddoperatorid\":\"00002\",\"cgddsendgoodsdate\":\"2016-02-05\",\"cgddcloseorganization\":\"\",\"cgddgoodstotalsum\":2}"; 
+		 String goodsInfo = "[{\"ddtype\":8,\"cgddorganization\":\"0000100001\",\"cgddsupplyunit\":\"0000200001\",\"cgddbrokerage\":\"00001\",\"cgddreceivestorehouse\":\"00001\",\"cgdddepartment\":\"00001\",\"cgdddate\":\"2016-02-05\",\"cgddgoodscode\":\"00004\",\"cgddgoodssum\":2,\"cgddgoodsprice\":\"299.0000000000\",\"cgddgoodscolor\":2,\"cgddgoodsindex\":1}]"; 
+		 String goodsDetailInfo = "[{\"cgddgoodssize\":8,\"cgddgoodssum\":2,\"cgddgoodsprice\":\"299.0000000000\",\"cgddgoodscolor\":2,\"cgddgoodsindex\":1}]"; 
+		 submitCGDD(cgddInfo, goodsInfo, goodsDetailInfo);
+		
 
 	}
 }

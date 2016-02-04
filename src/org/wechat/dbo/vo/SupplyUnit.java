@@ -142,17 +142,17 @@ public class SupplyUnit {
 	 * @param itemsInEachPage
 	 * @return
 	 */
-	public String getSupplyUnitInfoByName(DBAccess dba, String name,String BranchId, String OperatorID, int pageNum, int itemsInEachPage) {
+	public String getSupplyUnitInfoByName(DBAccess dba, int customer1, String name, String BranchId, String OperatorID, int bDisplayStop,int pageNum, int itemsInEachPage) {
 		JSONArray result = new JSONArray();
 		try {
 			// 设置输入参数列表
 			List<InParam> inParamList = new ArrayList<InParam>();
 			inParamList.add(new InParam(1, new Integer(0)));//模糊查询内容
-			inParamList.add(new InParam(2, new Integer(2)));
+			inParamList.add(new InParam(2, new Integer(customer1)));
 			inParamList.add(new InParam(3, "%"+name+"%"));
 			inParamList.add(new InParam(4, OperatorID));
 			inParamList.add(new InParam(5, BranchId));
-			inParamList.add(new InParam(6, new Integer(0)));
+			inParamList.add(new InParam(6, new Integer(bDisplayStop)));
 			inParamList.add(new InParam(7, " 1=1 "));
 			inParamList.add(new InParam(8, new Integer(pageNum)));
 			inParamList.add(new InParam(9, new Integer(itemsInEachPage)));
@@ -231,7 +231,7 @@ public class SupplyUnit {
 		DBAccess dba = new DBAccess(true);
 		SupplyUnit supplyUnit = new SupplyUnit();
 		//String result = supplyUnit.getSupplyUnitInfo(dba, 1, "0000100007", DBConst.default_orgnization, DBConst.default_OperatorID, 0, 1, 5);
-		String result = supplyUnit.getSupplyUnitInfoByName(dba, "一", DBConst.default_orgnization,"00002", 1, 5);
+		String result = supplyUnit.getSupplyUnitInfoByName(dba, 2,"一", DBConst.default_orgnization,"00002", 0,1, 5);
 		System.out.println("供货单位：" + result);
 		dba.close();
 	}

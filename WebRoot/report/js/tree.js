@@ -76,8 +76,10 @@ function Tree(container,upLevel,choosedInfoValue,choosedInfoLabel,propId,propNam
 			var len = subArray.length;
 			if(len>0){
 				hrefObj.bind("click",function(){ 
-					$("#"+choosedInfoLabel).attr("value",$(this).text());
-					$("#"+choosedInfoValue).attr("value",$(this).attr(propId));
+					if(popType!=1 && popType!=2 && popType!=3 && popType!=4){//树形组件只能选叶节点
+						$("#"+choosedInfoLabel).attr("value",$(this).text());
+						$("#"+choosedInfoValue).attr("value",$(this).attr(propId));
+					}
 					//如果为商品树，则额外设置下选择商品的货号
 					if(popType==4 || popType==5 ){
 						var pusercode = $(this).attr("pusercode");

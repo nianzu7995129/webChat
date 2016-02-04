@@ -491,9 +491,16 @@
 		function sendForSupplyunitByName(pageNum,backFunc){
 			var danwei = $("#danwei").val();
 			var organization = $("#jigou").data("orgCode");
-			var requestData = "action=action_supplyunit_byname&name="+danwei+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum=1&itemsInEachPage=5";
+			var sub_organization = organization.substring(0,5);
+			var otherParam = "&custom1=32&bDisplayStop=0";
+			if(sub_organization=="00001"){//内部机构
+				otherParam = "&custom1=30&bDisplayStop=1";
+			}else if(sub_organization=="00004"){//加盟机构
+				otherParam = "&custom1=32&bDisplayStop=1";
+			}
+			var requestData = "action=action_supplyunit_byname&name="+danwei+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum=1&itemsInEachPage=5"+otherParam;
 			if(pageNum!=null){
-				requestData = "action=action_supplyunit_byname&name="+danwei+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum="+pageNum+"&itemsInEachPage=5";
+				requestData = "action=action_supplyunit_byname&name="+danwei+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum="+pageNum+"&itemsInEachPage=5"+otherParam;
 			}
 			$.ajax({
 				url: contextPath+"/BusinessServlet",

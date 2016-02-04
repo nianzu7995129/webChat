@@ -1081,6 +1081,20 @@
 				}
 			}
 		});
+		
+		$("#price").change(function(){
+			var sumValue = $("#sum").val();
+			var price = $("#price").val();
+			if(validate(price)){
+				var money = sumValue*price;
+				$("#money").val(money);
+				$("#transaction").val(money);
+			}else{
+				$("#money").val("");
+				$("#transaction").val("");
+			}
+		});
+		
 		$("#money").on("input",function(e){
 			var moneyValue = $("#money").val();
 			if(!validate(moneyValue)){
@@ -1261,9 +1275,9 @@
 		function sendForSupplyunitByName(pageNum,backFunc){
 			var gonghuodanwei = $("#gonghuodanwei").val();
 			var organization = $("#jigou").data("orgCode");
-			var requestData = "action=action_supplyunit_byname&name="+gonghuodanwei+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum=1&itemsInEachPage=5";
+			var requestData = "action=action_supplyunit_byname&name="+gonghuodanwei+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum=1&itemsInEachPage=5&custom1=1&bDisplayStop=0";
 			if(pageNum!=null){
-				requestData = "action=action_supplyunit_byname&name="+gonghuodanwei+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum="+pageNum+"&itemsInEachPage=5";
+				requestData = "action=action_supplyunit_byname&name="+gonghuodanwei+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum="+pageNum+"&itemsInEachPage=5&custom1=1&bDisplayStop=0";
 			}
 			$.ajax({
 				url: contextPath+"/BusinessServlet",

@@ -169,11 +169,13 @@ public class BusinessServlet extends HttpServlet {
 				result = bs.getGoodsInfoByNumber(goodsCode, storeHouseID, OperatorID, pageNum, itemsInEachPage);
 			} else if (action_supplyunit_byname.equals(action)) {
 				String name = request.getParameter("name");
+				int custom1 = Integer.parseInt(request.getParameter("custom1"));
+				int bDisplayStop = Integer.parseInt(request.getParameter("bDisplayStop"));
 				String organization = request.getParameter("organization");
 				String OperatorID = request.getParameter("OperatorID");
 				int pageNum = Integer.parseInt(request.getParameter("pageNum"));
 				int itemsInEachPage = Integer.parseInt(request.getParameter("itemsInEachPage"));
-				result = bs.getSupplyUnitByName(name, organization, OperatorID, pageNum, itemsInEachPage);
+				result = bs.getSupplyUnitByName(custom1,name, organization, OperatorID, bDisplayStop, pageNum, itemsInEachPage);
 			} else if (action_goodscolor.equals(action)) {
 				String storeHouseID = request.getParameter("storeHouseID");
 				String goodsID = request.getParameter("goodsID");

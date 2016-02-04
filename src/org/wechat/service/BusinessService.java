@@ -169,21 +169,23 @@ public class BusinessService {
 	
 	/**
 	 * 
+	 * @param customer1 查询类型 1：采购订单供货单位，2：销售订单客户，3：
 	 * @param name	模糊查询
 	 * @param orgCode
 	 * @param OperatorID
+	 * @param bDisplayStop 0:采购订单供货单位和销售订单客户，1：往来账目，应收查询和应付查询表
 	 * @param pageNum
 	 * @param itemsInEachPage
 	 * @return
 	 * @throws Exception
 	 */
-	public String getSupplyUnitByName(String name, String orgCode, String OperatorID, int pageNum, int itemsInEachPage) throws Exception {
+	public String getSupplyUnitByName(int customer1 ,String name, String orgCode, String OperatorID,int bDisplayStop ,int pageNum, int itemsInEachPage) throws Exception {
 		SupplyUnit supplyUnit = new SupplyUnit();
 		DBAccess dba = null;
 		String result = "";
 		try {
 			dba = new DBAccess();
-			result = supplyUnit.getSupplyUnitInfoByName(dba, name, orgCode,OperatorID, pageNum, itemsInEachPage);
+			result = supplyUnit.getSupplyUnitInfoByName(dba, customer1,name, orgCode,OperatorID, bDisplayStop, pageNum, itemsInEachPage);
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
 		} finally {
