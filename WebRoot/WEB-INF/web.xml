@@ -12,11 +12,12 @@
 	</servlet>
 	<servlet>
 		<servlet-name>BusinessServlet</servlet-name>
-		<servlet-class>
-			org.wechat.servlet.BusinessServlet
-		</servlet-class>
+		<servlet-class>org.wechat.servlet.BusinessServlet</servlet-class>
 	</servlet>
-	
+	<servlet>
+		<servlet-name>AuthServlet</servlet-name>
+		<servlet-class>org.wechat.servlet.AuthServlet</servlet-class>
+	</servlet>
 	
 	<servlet-mapping>
 		<servlet-name>CoreServlet</servlet-name>
@@ -30,6 +31,14 @@
 		<servlet-name>BusinessServlet</servlet-name>
 		<url-pattern>/BusinessServlet</url-pattern>
 	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>AuthServlet</servlet-name>
+		<url-pattern>/AuthServlet</url-pattern>
+	</servlet-mapping>
 	
+	<session-config>
+		<session-timeout>1</session-timeout>
+	</session-config>
+
 </web-app>
 

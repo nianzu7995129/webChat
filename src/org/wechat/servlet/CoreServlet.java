@@ -24,7 +24,7 @@ public class CoreServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		System.out.println("coreServlet>>>>>>>doGet>>>>>>");
+		//System.out.println("coreServlet>>>>>>>doGet>>>>>>");
 		// 微信加密签名
 		String signature = request.getParameter("signature");
 		// 时间戳

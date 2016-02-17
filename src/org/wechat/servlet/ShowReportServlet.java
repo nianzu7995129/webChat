@@ -22,7 +22,7 @@ public class ShowReportServlet extends HttpServlet {
 			String host = FileUtil.readFileByChars();
 			StringBuffer jspUrl = new StringBuffer(host).append("demo/report/").append(jspName).append(".jsp");
 			//StringBuffer jspUrl = new StringBuffer("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx979468582d2cc19d&redirect_uri=http://115.28.43.22/demo/report/report_cgdd.jsp&response_type=code#wechat_redirect");
-			System.out.println("jspUrl>>>" + jspUrl);
+			//System.out.println("jspUrl>>>" + jspUrl);
 			response.sendRedirect(jspUrl.toString());
 		} catch (Exception e) {
 			e.printStackTrace();

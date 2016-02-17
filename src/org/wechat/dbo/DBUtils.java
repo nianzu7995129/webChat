@@ -87,7 +87,7 @@ public class DBUtils {
 			conn = dba.getConn();
 			PreparedStatement ps = null;
 			String bigSql = genSaveOrderBigSql(mainInfoJo,goodsInfoJa,goodsDetailInfoJa);
-			System.out.println(bigSql);
+			//System.out.println(bigSql);
 			// -----------------------------------------主表信息-----------------------------------------
 			ps = conn.prepareStatement(bigSql);
 			List<List<InParam>> mainInfoParamList = insertMainInfo(id19, mainInfoJo.toString());
@@ -106,7 +106,7 @@ public class DBUtils {
 					}
 				}
 			}
-			System.out.println("主表信息保存結束");
+			//System.out.println("主表信息保存結束");
 			// <<---------------------------------------主表信息-----------------------------------------
 			// ---------------------------------------商品细单信息-----------------------------------------
 
@@ -119,7 +119,7 @@ public class DBUtils {
 							int index = inParam.getIndex();
 							Object value = inParam.getValue();
 							if (value instanceof Integer) {
-								System.out.println("intValue>>"+((Integer) value).intValue());
+								//System.out.println("intValue>>"+((Integer) value).intValue());
 								ps.setInt(index, ((Integer) value).intValue());
 							} else if (value instanceof String) {
 								ps.setString(index, (String) value);
@@ -128,7 +128,7 @@ public class DBUtils {
 					}
 				}
 			}
-			System.out.println("商品细单保存結束");
+			//System.out.println("商品细单保存結束");
 			// <<---------------------------------------商品细单信息-----------------------------------------
 			// -----------------------------------------商品尺码信息-----------------------------------------
 			start += 21 * goodsInfoJa.length();
@@ -140,7 +140,7 @@ public class DBUtils {
 							int index = inParam.getIndex();
 							Object value = inParam.getValue();
 							if (value instanceof Integer) {
-								System.out.println("intValue>>"+((Integer) value).intValue());
+								//System.out.println("intValue>>"+((Integer) value).intValue());
 								ps.setInt(index, ((Integer) value).intValue());
 							} else if (value instanceof String) {
 								ps.setString(index, (String) value);
@@ -149,7 +149,7 @@ public class DBUtils {
 					}
 				}
 			}
-			System.out.println("商品尺寸细单保存結束");
+			//System.out.println("商品尺寸细单保存結束");
 			// <<---------------------------------------商品尺码信息-----------------------------------------
 
 			// -----------------------------------------保存订单-----------------------------------------
@@ -339,39 +339,39 @@ public class DBUtils {
 			// 输入参数
 			//insert into @p2 values(0,0,?,						 ?,			  ?,			 ?,	 			?,		  ?,		?,		  ?,		?,    ?,  N'100.00', ?,0,N'100',N'0',N'0.00',         		 ?,			?,			?,  		   ?,  0,N'0.00',       ?,   N'0.00',    ?,     N'0',0,0,N'0',0,?  ,0,N'0.00',      ?,    N'',N'',N'0',N'0',N'',0,0,N'',N'',N'',N'',N'',N'',1,N'1',0,? ,N'0',N'0',    ?    ,N'0')
 			//insert into @p2 values(0,0,N'1543140627735185292 ',8,N'0000100001 ',N'0000100001 ',N'0000200001 ',N'00003 ',N'00001 ',N'00002 ',N'00008 ',N'11 ',N'100.00',N'136.80 ',0,N'100',N'0',N'0.00',N'136.80 ',N'136.80 ',N'1504.80 ',N'2015-12-27 ',0,N'0.00',N'136.80 ',N'0.00',N'1504.80 ',N'0',0,0,N'0',0,15 ,0,N'0.00',N'1504.80 ',N'',N'',N'0',N'0',N'',0,0,N'',N'',N'',N'',N'',N'',1,N'1',0,1 ,N'0',N'0',N'136.80 ',N'0')
-			System.out.println("id19>>"+id19);
+			//System.out.println("id19>>"+id19);
 			inParams.add(new InParam(1 + addedIndex, id19)); // 第二轮开始为35 20+14+1
-			System.out.println("ddtype>>"+jo.optInt("ddtype"));
+			//System.out.println("ddtype>>"+jo.optInt("ddtype"));
 			inParams.add(new InParam(2 + addedIndex, jo.optInt("ddtype"))); // 订单类型，销售订单为8，采购订单为7
-			System.out.println("cgddorganization>>"+jo.optString("cgddorganization"));
+			//System.out.println("cgddorganization>>"+jo.optString("cgddorganization"));
 			inParams.add(new InParam(3 + addedIndex, jo.optString("cgddorganization")));
 			inParams.add(new InParam(4 + addedIndex, jo.optString("cgddorganization")));
-			System.out.println("cgddsupplyunit>>"+jo.optString("cgddsupplyunit"));
+			//System.out.println("cgddsupplyunit>>"+jo.optString("cgddsupplyunit"));
 			inParams.add(new InParam(5 + addedIndex, jo.optString("cgddsupplyunit")));
-			System.out.println("cgddbrokerage>>"+jo.optString("cgddbrokerage"));
+			//System.out.println("cgddbrokerage>>"+jo.optString("cgddbrokerage"));
 			inParams.add(new InParam(6 + addedIndex, jo.optString("cgddbrokerage")));
-			System.out.println("cgddreceivestorehouse>>"+jo.optString("cgddreceivestorehouse"));
+			//System.out.println("cgddreceivestorehouse>>"+jo.optString("cgddreceivestorehouse"));
 			inParams.add(new InParam(7 + addedIndex, jo.optString("cgddreceivestorehouse")));
-			System.out.println("cgdddepartment>>"+jo.optString("cgdddepartment"));
+			//System.out.println("cgdddepartment>>"+jo.optString("cgdddepartment"));
 			inParams.add(new InParam(8 + addedIndex, jo.optString("cgdddepartment")));
-			System.out.println("cgddgoodscode>>"+jo.optString("cgddgoodscode"));
+			//System.out.println("cgddgoodscode>>"+jo.optString("cgddgoodscode"));
 			inParams.add(new InParam(9 + addedIndex, jo.optString("cgddgoodscode")));
-			System.out.println("cgddgoodssumStr>>"+cgddgoodssumStr);
+			//System.out.println("cgddgoodssumStr>>"+cgddgoodssumStr);
 			inParams.add(new InParam(10 + addedIndex, cgddgoodssumStr));
 			inParams.add(new InParam(11 + addedIndex, jo.optString("cgddgoodsprice")));
-			System.out.println("cgddgoodsprice>>"+jo.optString("cgddgoodsprice"));
+			//System.out.println("cgddgoodsprice>>"+jo.optString("cgddgoodsprice"));
 			inParams.add(new InParam(12 + addedIndex, jo.optString("cgddgoodsprice")));
 			inParams.add(new InParam(13 + addedIndex, jo.optString("cgddgoodsprice")));
-			System.out.println("sumStr>>"+sumStr);
+			//System.out.println("sumStr>>"+sumStr);
 			inParams.add(new InParam(14 + addedIndex, sumStr));
-			System.out.println("cgdddate>>"+jo.optString("cgdddate"));
+			//System.out.println("cgdddate>>"+jo.optString("cgdddate"));
 			inParams.add(new InParam(15 + addedIndex, jo.optString("cgdddate")));
 			inParams.add(new InParam(16 + addedIndex, jo.optString("cgddgoodsprice")));
 			inParams.add(new InParam(17 + addedIndex, sumStr));
-			System.out.println("cgddgoodscolor>>"+jo.optInt("cgddgoodscolor"));
+			//System.out.println("cgddgoodscolor>>"+jo.optInt("cgddgoodscolor"));
 			inParams.add(new InParam(18 + addedIndex, jo.optInt("cgddgoodscolor")));
 			inParams.add(new InParam(19 + addedIndex, sumStr));
-			System.out.println("cgddgoodsindex>>"+jo.optInt("cgddgoodsindex"));
+			//System.out.println("cgddgoodsindex>>"+jo.optInt("cgddgoodsindex"));
 			inParams.add(new InParam(20 + addedIndex, jo.optInt("cgddgoodsindex")));//
 			inParams.add(new InParam(21 + addedIndex, jo.optString("cgddgoodsprice")));// 14+20
 			inParamsList.add(inParams);
@@ -400,17 +400,17 @@ public class DBUtils {
 			// insert into @p3 values(0,?					   ,? ,?  , ?    ,N'0',N'0.00',N'0',N'0.00',N'1504.80 ',N'1504.80 ',N'0.00',N'1504.80 ',1 ,N'0',N'0',N'0')
 			// insert into @p3 values(0,N'1543140627735185292 ',1 ,15 ,N'11 ',N'0',N'0.00',N'0',N'0.00',N'1504.80 ',N'1504.80 ',N'0.00',N'1504.80 ',1 ,N'0',N'0',N'0')
 			inParams.add(new InParam(1 + addedIndex, id19));// 51+1,59+1
-			System.out.println("size>>>>"+jo.optInt("cgddgoodssize"));
+			//System.out.println("size>>>>"+jo.optInt("cgddgoodssize"));
 			inParams.add(new InParam(2 + addedIndex, jo.optInt("cgddgoodssize")));
-			System.out.println("color>>>>"+jo.optInt("cgddgoodscolor"));
+			//System.out.println("color>>>>"+jo.optInt("cgddgoodscolor"));
 			inParams.add(new InParam(3 + addedIndex, jo.optInt("cgddgoodscolor")));
-			System.out.println("cgddgoodssumStr>>>>"+cgddgoodssumStr);
+			//System.out.println("cgddgoodssumStr>>>>"+cgddgoodssumStr);
 			inParams.add(new InParam(4 + addedIndex, cgddgoodssumStr));
-			System.out.println("sumStr>>>>"+sumStr);
+			//System.out.println("sumStr>>>>"+sumStr);
 			inParams.add(new InParam(5 + addedIndex, sumStr));
 			inParams.add(new InParam(6 + addedIndex, sumStr));
 			inParams.add(new InParam(7 + addedIndex, sumStr));
-			System.out.println("index>>>>"+jo.optInt("cgddgoodsindex"));
+			//System.out.println("index>>>>"+jo.optInt("cgddgoodsindex"));
 			inParams.add(new InParam(8 + addedIndex, new Integer(jo.optInt("cgddgoodsindex"))));// 59
 			inParamsList.add(inParams);
 		}

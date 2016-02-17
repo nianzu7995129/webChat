@@ -1,10 +1,19 @@
 ﻿<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ page import="org.wechat.utils.AuthUtil"%>
 <%
 	String contextPath = request.getContextPath();
-	String pcName = request.getServerName();
 	String OperatorID = (String)session.getAttribute("OperatorID");
 	if(OperatorID==null){
-		OperatorID = "00002";
+		session.setAttribute("visitPage","report_kczkb.jsp");
+		response.setContentType("text/html; charset=UTF-8");
+		response.sendRedirect("login.jsp");
+	}else{
+		boolean valid = AuthUtil.checkValid(OperatorID,"kczkb");
+		if(!valid){
+			session.setAttribute("visitPage","report_kczkb.jsp");
+			response.setContentType("text/html; charset=UTF-8");
+			response.sendRedirect("noAuth.jsp");
+		}
 	}
 %>
 <!DOCTYPE html>
@@ -14,6 +23,9 @@
 		<script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
 		<script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="pragma" content="no-cache"> 
+		<meta http-equiv="cache-control" content="no-cache"> 
+		<meta http-equiv="expires" content="0">
 		<script src="js/tree.js"></script>
 		<script src="js/goods.js"></script>
 		<script src="js/loading.js"></script>

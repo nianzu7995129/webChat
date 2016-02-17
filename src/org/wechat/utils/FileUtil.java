@@ -51,7 +51,6 @@ public class FileUtil {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-		System.out.println("path>>" + path);
 		return path;
 	}
 
@@ -106,5 +105,39 @@ public class FileUtil {
 			}
 		}
 		return url;
+	}
+	
+	/**
+	 * 
+	 * @param curFileName 如：auth.json
+	 * @return
+	 */
+	public static String readAuthFileByChars() {
+		StringBuffer sb = new StringBuffer();
+		String path = getAutoFilePath();
+		Reader reader = null;
+		File file = new File(path);
+		try {
+			// 一次读一个字符
+			reader = new InputStreamReader(new FileInputStream(file));
+			int tempchar;
+			while ((tempchar = reader.read()) != -1) {
+				// 对于windows下，\r\n这两个字符在一起时，表示一个换行。
+				// 但如果这两个字符分开显示时，会换两次行。
+				// 因此，屏蔽掉\r，或者屏蔽\n。否则，将会多出很多空行。
+				if (((char) tempchar) != '\r') {
+					sb.append((char) tempchar);
+				}
+			}
+			reader.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			sb.append("权限配置读取失败");
+		}
+		return sb.toString();
+	}
+	
+	public static String getAutoFilePath(){
+		return getWebRoot() + File.separator + "WEB-INF" + File.separator + "auth.json";
 	}
 }
