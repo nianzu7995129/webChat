@@ -360,22 +360,27 @@
 			});
 			$("#curusername").val(un);
 			var authArr = auth.split(",");
+			refreshCheckbox("cgdd",authArr);
+			refreshCheckbox("kczkb",authArr);
+			refreshCheckbox("xsdd",authArr);
+			refreshCheckbox("spxsfxb",authArr);
+			refreshCheckbox("yfkcx",authArr);
+			refreshCheckbox("yskcx",authArr);
+		}
+		
+		function refreshCheckbox(name,authArr){
 			var len = authArr.length;
+			var isIn = false;
 			for(var i=0;i<len;i++){
 				var tmp = authArr[i];
-				if("cgdd" == tmp){
-					$("#cgdd").attr("checked",true).checkboxradio("refresh");
-				}else if("kczkb" == tmp){
-					$("#kczkb").attr("checked",true).checkboxradio("refresh");
-				}else if("xsdd" == tmp){
-					$("#xsdd").attr("checked",true).checkboxradio("refresh");
-				}else if("spxsfxb" == tmp){
-					$("#spxsfxb").attr("checked",true).checkboxradio("refresh");
-				}else if("yfkcx" == tmp){
-					$("#yfkcx").attr("checked",true).checkboxradio("refresh");
-				}else if("yskcx" == tmp){
-					$("#yskcx").attr("checked",true).checkboxradio("refresh");
+				if(name == tmp){
+					isIn = true;
+					$("#"+name).attr("checked",true).checkboxradio("refresh");
+					break;
 				}
+			}
+			if(!isIn){
+				$("#"+name).attr("checked",false).checkboxradio("refresh");
 			}
 		}
 		
