@@ -55,12 +55,7 @@ public class SupplyUnit {
 					totalPage = itemCount/itemsInEachPage+1;
 				}
 			}
-
 			List<SupplyUnit> supplyUnitList = resultSetToList(rs,totalPage);
-			for (SupplyUnit tmp : supplyUnitList) {
-				tmp.setSubList(findNext(dba, usertype, tmp.btypeid, OperatorID, BranchId, bDisplayStop, itemsInEachPage));
-			}
-
 			result = JSONArray.fromObject(supplyUnitList);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -87,49 +82,6 @@ public class SupplyUnit {
 			tmpList.add(supplyUnit);
 		}
 		return tmpList;
-	}
-
-	private List<SupplyUnit> findNext(DBAccess dba, int useType, String szparid, String OperatorID, String BranchId, int bDisplayStop, int itemsInEachPage) throws SQLException {
-		List<SupplyUnit> list = new ArrayList<SupplyUnit>();
-
-		// 设置输入参数列表
-		List<InParam> inParamList = new ArrayList<InParam>();
-		inParamList.add(new InParam(1, new Integer(useType)));
-		inParamList.add(new InParam(2, szparid));
-		inParamList.add(new InParam(3, new Integer(0)));
-		inParamList.add(new InParam(4, OperatorID));
-		inParamList.add(new InParam(5, BranchId));
-		inParamList.add(new InParam(6, new Integer(bDisplayStop)));
-		inParamList.add(new InParam(7, " 1=1 "));
-		inParamList.add(new InParam(8, new Integer(1)));
-		inParamList.add(new InParam(9, new Integer(itemsInEachPage)));
-
-		// 设置输出参数列表
-		List<OutParam> outParamList = new ArrayList<OutParam>();
-		outParamList.add(new OutParam(10, java.sql.Types.INTEGER));
-
-		List<Object> resultList = dba.executeProcedure(sql, inParamList, outParamList, 10, true);
-		ResultSet rs = (ResultSet) resultList.get(0);
-		
-		int totalPage = 0;
-		if (resultList.size() > 1) {
-			int itemCount = Integer.parseInt(resultList.get(1).toString());
-			if(itemCount%itemsInEachPage==0){
-				totalPage = itemCount/itemsInEachPage;
-			}else{
-				totalPage = itemCount/itemsInEachPage+1;
-			}
-		}
-
-		List<SupplyUnit> supplyUnitList = resultSetToList(rs,totalPage);
-		for (SupplyUnit tmp : supplyUnitList) {
-			if (szparid.equals(tmp.btypeid))
-				break;// 子供货单位编码等于上一级则退出循环
-			tmp.setSubList(findNext(dba, useType, tmp.btypeid, OperatorID, BranchId, bDisplayStop, itemsInEachPage));
-			list.add(tmp);
-		}
-
-		return list;
 	}
 	
 	/**
@@ -230,8 +182,8 @@ public class SupplyUnit {
 	public static void main(String args[]) throws Exception {
 		DBAccess dba = new DBAccess(true);
 		SupplyUnit supplyUnit = new SupplyUnit();
-		//String result = supplyUnit.getSupplyUnitInfo(dba, 1, "0000100007", DBConst.default_orgnization, DBConst.default_OperatorID, 0, 1, 5);
-		String result = supplyUnit.getSupplyUnitInfoByName(dba, 2,"一", DBConst.default_orgnization,"00002", 0,1, 5);
+		String result = supplyUnit.getSupplyUnitInfo(dba, 2, null, DBConst.default_orgnization, "00000", 0, 1, 14);
+		//String result = supplyUnit.getSupplyUnitInfoByName(dba, 2,null, DBConst.default_orgnization,"00000", 0,1, 14);
 		System.out.println("供货单位：" + result);
 		dba.close();
 	}

@@ -158,6 +158,8 @@
 		var shangpincode = null;//商品编码 （用于判断商品编码是否改变）
 		var goodsData = null;//商品信息
 		
+		var ajaxTimeout = 1000000;
+		
 		$(function(){
 			
 			//初始化时使部分下拉列表不可编辑，选择机构后才可编辑。这样不需要单独处理每个下拉列表的click加载
@@ -258,8 +260,8 @@
 					data: "action=action_query_spxsfxb&OperatorID=<%=OperatorID%>&goodsID="+shangpin+"&organization="+organization+"&beginDate="+kaishiriqi+"&endDate="+jieshuriqi+"&employeeID="+zhiyuan+"&deptId="+bumen,
 					type: "POST",
 					dataType: 'text',
-					timeout: 10000,
-					async:false,
+					timeout: ajaxTimeout,
+					async:true,
 					error: function(XMLHttpRequest, textStatus, errorThrown){
 						showTip("请求服务器数据异常!",true);
 					},
@@ -460,8 +462,8 @@
 				data: "action=action_organization&OperatorID=<%=OperatorID%>&userType="+userType,
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 				},
@@ -498,8 +500,8 @@
 				data: "action=action_employee&OperatorID=<%=OperatorID%>&organization="+organization,
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 				},
@@ -543,8 +545,8 @@
 				data: "action=action_department&OperatorID=<%=OperatorID%>&organization="+organization,
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 				},
@@ -587,8 +589,8 @@
 				data: "action=action_kczkb_storehouse&OperatorID=<%=OperatorID%>&organization="+organization,
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 				},
@@ -625,17 +627,17 @@
 		//请求后台生成商品列表
 		function sendForGoods(goodsCode,pageNum,backFunc){
 			var storeHouseID = $("#cangku").val();
-			var requestData = "action=action_kczkb_goods&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum=1&itemsInEachPage=5";
+			var requestData = "action=action_kczkb_goods&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum=1&itemsInEachPage=14";
 			if(pageNum!=null){
-				requestData = "action=action_kczkb_goods&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum="+pageNum+"&itemsInEachPage=5&goodsCode="+goodsCode;
+				requestData = "action=action_kczkb_goods&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum="+pageNum+"&itemsInEachPage=14&goodsCode="+goodsCode;
 			}
 			$.ajax({
 				url: contextPath+"/BusinessServlet",
 				data: requestData,
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 					return;
@@ -670,17 +672,17 @@
 		function sendForGoodsByNumber(pageNum,backFunc){
 			var huohao = $("#shangpin").val();
 			var storeHouseID = $("#cangku").val();
-			var requestData = "action=action_goods_bynumer&goodsCode="+huohao+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum=1&itemsInEachPage=5";
+			var requestData = "action=action_goods_bynumer&goodsCode="+huohao+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum=1&itemsInEachPage=14";
 			if(pageNum!=null){
-				requestData = "action=action_goods_bynumer&goodsCode="+huohao+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum="+pageNum+"&itemsInEachPage=5";
+				requestData = "action=action_goods_bynumer&goodsCode="+huohao+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum="+pageNum+"&itemsInEachPage=14";
 			}
 			$.ajax({
 				url: contextPath+"/BusinessServlet",
 				data: requestData,
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 					return;

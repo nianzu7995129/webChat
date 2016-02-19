@@ -190,6 +190,8 @@
 		var customerData = null;//客户数据
 		var alreadyChooseGoodsData = {"goodsList": []};//商品列表
 		
+		var ajaxTimeout = 1000000;
+		
 		$(function(){
 			//初始化时使部分下拉列表不可编辑，选择机构后才可编辑。这样不需要单独处理每个下拉列表的click加载
 			$("#jingshouren").selectmenu("disable",true);
@@ -265,6 +267,7 @@
 			*/
 			
 			$("#kehu").bind("keydown",function(event){
+				showLoader();
 				if(event.which==13){
 					var organization = $("#jigou").data("orgCode");
 					var tmp = $("#kehu").val();
@@ -507,8 +510,8 @@
 					data: "action=action_code_exist&date="+date+"&pcName=<%=pcName%>&code="+$("#bianhao").val()+"&useType=8",
 					type: "POST",
 					dataType: 'text',
-					timeout: 10000,
-					async:false,
+					timeout: ajaxTimeout,
+					async:true,
 					error: function(XMLHttpRequest, textStatus, errorThrown){
 						showTip("请求服务器数据异常!",true);
 					},
@@ -621,8 +624,8 @@
 									data: "action=action_save_cgdd&cgddInfo="+cgddInfo+"&goodsInfo="+goodsInfo+"&goodsDetailInfo="+goodsDetailInfo,
 									type: "POST",
 									dataType: 'text',
-									timeout: 10000,
-									async:false,
+									timeout: ajaxTimeout,
+									async:true,
 									error: function(XMLHttpRequest, textStatus, errorThrown){
 										showTip("请求服务器数据异常!",true);
 									},
@@ -673,8 +676,8 @@
 				data: "action=action_xsdd_code&date="+date+"&pcName=<%=pcName%>",
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					/*
 					alert(XMLHttpRequest.status);
@@ -718,8 +721,8 @@
 				data: "action=action_organization&OperatorID=<%=OperatorID%>&userType=23",
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 				},
@@ -756,8 +759,8 @@
 				data: "action=action_brokerage&OperatorID=<%=OperatorID%>&organization="+organization,
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 				},
@@ -796,8 +799,8 @@
 				data: "action=action_department&BrokerageID="+brokerage+"&OperatorID=<%=OperatorID%>&organization="+organization,
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 				},
@@ -832,17 +835,17 @@
 		//生成客户
 		function sendForSupplyUnit(supplyUnitCode,pageNum,backCall){
 			var organization =  $("#jigou").data("orgCode");
-			var requestData = "action=action_xsdd_customer&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum=1&itemsInEachPage=5"
+			var requestData = "action=action_xsdd_customer&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum=1&itemsInEachPage=14"
 			if(pageNum != null  && supplyUnitCode != null){
-				requestData = "action=action_xsdd_customer&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum="+pageNum+"&itemsInEachPage=5&supplyUnitCode="+supplyUnitCode
+				requestData = "action=action_xsdd_customer&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum="+pageNum+"&itemsInEachPage=14&supplyUnitCode="+supplyUnitCode
 			}
 			$.ajax({
 				url: contextPath+"/BusinessServlet",
 				data: requestData,
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 				},
@@ -889,8 +892,8 @@
 				data: "action=action_xsdd_storehouse&OperatorID=<%=OperatorID%>&organization="+organization,
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 				},
@@ -932,8 +935,8 @@
 				data: "action=action_xsdd_goodstype&organization="+organization,
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 				},
@@ -1123,17 +1126,17 @@
 		//请求后台生成商品数据，只取数据，展现留在跳转页面后的点击
 		function sendForGoods(goodsCode,pageNum,backFunc){
 			var storeHouseID = $("#fahuocangku").val();
-			var requestData = "action=action_xsdd_goods&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum=1&itemsInEachPage=5";
+			var requestData = "action=action_xsdd_goods&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum=1&itemsInEachPage=14";
 			if(pageNum!=null){
-				requestData = "action=action_xsdd_goods&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum="+pageNum+"&itemsInEachPage=5&goodsCode="+goodsCode;
+				requestData = "action=action_xsdd_goods&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum="+pageNum+"&itemsInEachPage=14&goodsCode="+goodsCode;
 			}
 			$.ajax({
 				url: contextPath+"/BusinessServlet",
 				data: requestData,
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 					return;
@@ -1144,7 +1147,6 @@
 					if(obj.isError=="true"){
 						showTip(result,true);
 					}else{
-						$("#treeContainer").empty();
 						goodsData = JSON.stringify(result);
 					}
 					$.mobile.changePage($("#pageBasic"), {
@@ -1173,8 +1175,8 @@
 				data: "action=action_xsdd_goodsInfo&goodsID="+goodsID+"&storeHouseID="+storeHouseID+"&OperatorID=<%=OperatorID%>",
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 				},
@@ -1238,17 +1240,17 @@
 		function sendForGoodsByNumber(pageNum,backFunc){
 			var huohao = $("#cgddgoodsnumber").val();
 			var storeHouseID = $("#shouhuocangku").val();
-			var requestData = "action=action_goods_bynumer&goodsCode="+huohao+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum=1&itemsInEachPage=5";
+			var requestData = "action=action_goods_bynumer&goodsCode="+huohao+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum=1&itemsInEachPage=14";
 			if(pageNum!=null){
-				requestData = "action=action_goods_bynumer&goodsCode="+huohao+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum="+pageNum+"&itemsInEachPage=5";
+				requestData = "action=action_goods_bynumer&goodsCode="+huohao+"&OperatorID=<%=OperatorID%>&storeHouseID="+storeHouseID+"&pageNum="+pageNum+"&itemsInEachPage=14";
 			}
 			$.ajax({
 				url: contextPath+"/BusinessServlet",
 				data: requestData,
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 					return;
@@ -1283,17 +1285,17 @@
 		function sendForSupplyunitByName(pageNum,backFunc){
 			var kehu = $("#kehu").val();
 			var organization = $("#jigou").data("orgCode");
-			var requestData = "action=action_supplyunit_byname&name="+kehu+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum=1&itemsInEachPage=5&custom1=2&bDisplayStop=0";
+			var requestData = "action=action_supplyunit_byname&name="+kehu+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum=1&itemsInEachPage=14&custom1=2&bDisplayStop=0";
 			if(pageNum!=null){
-				requestData = "action=action_supplyunit_byname&name="+kehu+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum="+pageNum+"&itemsInEachPage=5&custom1=2&bDisplayStop=0";
+				requestData = "action=action_supplyunit_byname&name="+kehu+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum="+pageNum+"&itemsInEachPage=14&custom1=2&bDisplayStop=0";
 			}
 			$.ajax({
 				url: contextPath+"/BusinessServlet",
 				data: requestData,
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 					return;

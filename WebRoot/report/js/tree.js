@@ -72,9 +72,41 @@ function Tree(container,upLevel,choosedInfoValue,choosedInfoLabel,propId,propNam
 			if(popType==4 || popType==5){
 				hrefObj.attr("pusercode",tmpResult["pusercode"]);
 			}
-			var subArray = tmpResult.subList;
-			var len = subArray.length;
-			if(len>0){
+			//机构，结算机构 沿用原来的方式,即请求的数据带有子节点数据
+			if(popType==1 || popType==3 || popType==5 || popType==6) {
+				var subArray = tmpResult.subList;
+				var len = subArray.length;
+				if(len>0){
+					hrefObj.bind("click",function(){ 
+						if(popType!=1 && popType!=2 && popType!=3 && popType!=4){//树形组件只能选叶节点
+							$("#"+choosedInfoLabel).attr("value",$(this).text());
+							$("#"+choosedInfoValue).attr("value",$(this).attr(propId));
+						}
+						//如果为商品树，则额外设置下选择商品的货号
+						if(popType==4 || popType==5 ){
+							var pusercode = $(this).attr("pusercode");
+							$("#choosedInfoOtherValue").attr("value",pusercode);
+						}
+						that.expandSub($(this));
+					});
+					hrefObj.on("taphold",function(){
+						that.expandSub($(this));
+					});
+				}else{
+					hrefObj.bind("click",function(){ 
+						$("#"+choosedInfoLabel).attr("value",$(this).text());
+						$("#"+choosedInfoValue).attr("value",$(this).attr(propId));
+						//如果为商品树，则额外设置下选择商品的货号
+						if(popType==4 || popType==5){
+							var pusercode = $(this).attr("pusercode");
+							$("#choosedInfoOtherValue").attr("value",pusercode);
+						}
+					});
+					hrefObj.bind("taphold",function(){ 
+						return ;
+					});
+				}
+			}else if(popType==2 || popType==4){
 				hrefObj.bind("click",function(){ 
 					if(popType!=1 && popType!=2 && popType!=3 && popType!=4){//树形组件只能选叶节点
 						$("#"+choosedInfoLabel).attr("value",$(this).text());
@@ -86,22 +118,6 @@ function Tree(container,upLevel,choosedInfoValue,choosedInfoLabel,propId,propNam
 						$("#choosedInfoOtherValue").attr("value",pusercode);
 					}
 					that.expandSub($(this));
-				});
-				hrefObj.on("taphold",function(){
-					that.expandSub($(this));
-				});
-			}else{
-				hrefObj.bind("click",function(){ 
-					$("#"+choosedInfoLabel).attr("value",$(this).text());
-					$("#"+choosedInfoValue).attr("value",$(this).attr(propId));
-					//如果为商品树，则额外设置下选择商品的货号
-					if(popType==4 || popType==5){
-						var pusercode = $(this).attr("pusercode");
-						$("#choosedInfoOtherValue").attr("value",pusercode);
-					}
-				});
-				hrefObj.bind("taphold",function(){ 
-					return ;
 				});
 			}
 			btnArray.push(hrefObj);
@@ -118,33 +134,92 @@ function Tree(container,upLevel,choosedInfoValue,choosedInfoLabel,propId,propNam
 		}
 	};
 	
+	
 	this.expandSub = function (inputObj){
-		$("#"+container).empty();
 		var sourceObjArray;
+		//客户，供货单位，商品等由于数据量大，点击节点时动态判断是展开还是设置值
+		var backCall = function(data){
+			var obj = JSON.parse(data);
+			var result = obj.result;
+			var tmpData;
+			if(obj.isError=="true"){
+				showTip(result,true);
+			}else{
+				if(popType==2){
+					tmpData = JSON.stringify(result);
+				}else if(popType==4){
+					tmpData = JSON.stringify(result);
+				}else{
+					showTip("未知的类型",true);
+				}
+				sourceObjArray = JSON.parse(tmpData);
+				showSub(sourceObjArray,inputObj,that);
+			}			
+			hideLoader();			
+		};
+		
 		if(popType==1 || popType==3){
 			sourceObjArray = JSON.parse(treeData);
 		}else if(popType==2){
-			sourceObjArray = JSON.parse(customerData);
+			var value = inputObj.attr(propId);
+			sendForSupplyUnit(value,1,backCall);
 		}else if(popType==4){
-			sourceObjArray = JSON.parse(goodsData);
+			var value = inputObj.attr(propId);
+			sendForGoods(value,1,backCall);
 		}else{
 			showTip("未知的类型",true);
 			return;
 		}
-		var len = sourceObjArray.length;
-		for(var i=0;i<len;i++){
-			var sourceObj = sourceObjArray[i];
+		if(popType==1 || popType==3){
+			showSub(sourceObjArray,inputObj,that);
+		}
+	};
+	
+	function showSub(sourceObjArray,inputObj,that){
+		//机构，结算结构，依靠原始数据即可展现不同等级
+		if(popType==1 || popType==3){
+			var len = sourceObjArray.length;
+			for(var i=0;i<len;i++){
+				var sourceObj = sourceObjArray[i];
+				var value = inputObj.attr(propId);
+				var array = that.findObj(sourceObj,value);
+				if(array){
+					//fatherIdArray.push(value);
+					$("#prevBtn").data("curId",value);
+					$("#nextBtn").data("curId",value);
+					that.pageNum = 1;	
+					that.show(array,false,value);
+				}
+			}
+		}else if(popType==2 || popType==4){//客户，供货单位，商品，由于是动态取每一级的数据，所以直接展现数组
 			var value = inputObj.attr(propId);
-			var array = that.findObj(sourceObj,value);
-			if(array){
+			var tmpLen = sourceObjArray.length;
+			var tmpFirstObj = null;
+			if(tmpLen>0){
+				tmpFirstObj = sourceObjArray[0];
+			}
+			if(tmpLen==1 && tmpFirstObj!=null && value == tmpFirstObj[propId]){//如果只有一个值，且id与父Id相同，则表示无子级，设为选中状态
+				$("#"+choosedInfoLabel).attr("value",tmpFirstObj[propName]);
+				$("#"+choosedInfoValue).attr("value",tmpFirstObj[propId]);
+				//如果为商品树，则额外设置下选择商品的货号
+				if(popType==4 || popType==5){
+					var pusercode = tmpFirstObj["pusercode"];
+					$("#choosedInfoOtherValue").attr("value",pusercode);
+				}
+			}else{
+				$("#"+container).empty();
 				fatherIdArray.push(value);
 				$("#prevBtn").data("curId",value);
 				$("#nextBtn").data("curId",value);
-				that.pageNum = 1;	
-				that.show(array,false,value);
+				that.pageNum = 1;
+				that.show(sourceObjArray,false,value);
 			}
+		}else{
+			showTip("未知的类型",true);
+			return;
 		}
-	};
+	}
+	
 	
 	this.returnAndexpandParentSub = function (value){
 		//机构和结算机构不分页，所以沿用原方式
@@ -163,13 +238,13 @@ function Tree(container,upLevel,choosedInfoValue,choosedInfoLabel,propId,propNam
 			}
 		}else if(popType==2){//客户（销售订单），供货单位（采购订单），单位（往来账目表） 有数据分页，所以需要返回上一级时动态取数
 			//alert(fatherIdArray.join("-_-")+"||"+value);
-			var fatherId = getFatherId(fatherIdArray,value);
-			//alert(fatherId);
+			var fatherId = fatherIdArray[fatherIdArray.length-2];//getFatherId(fatherIdArray,value);
+			fatherIdArray.splice(fatherIdArray.length-1,1);
 			getUpLevelData(fatherId);
 		}else if(popType==4){//商品 有数据分页，所以需要返回上一级时动态取数
 			//alert(fatherIdArray.join("-_-")+"||"+value);
-			var fatherId = getFatherId(fatherIdArray,value);
-			//alert(fatherId);
+			var fatherId = fatherIdArray[fatherIdArray.length-2];//getFatherId(fatherIdArray,value);
+			fatherIdArray.splice(fatherIdArray.length-1,1);
 			getUpLevelData(fatherId);
 		}else {
 			showTip("未知的类型",true);
@@ -211,6 +286,7 @@ function Tree(container,upLevel,choosedInfoValue,choosedInfoLabel,propId,propNam
 }
 
 //获得上一级的编码
+/*
 function getFatherId(fatherIdArray,value){
 	var index = 0;
 	var len = fatherIdArray.length;
@@ -223,9 +299,11 @@ function getFatherId(fatherIdArray,value){
 	}
 	return fatherIdArray[index-1];
 }
+*/
 
 //根据页码取数
 function getData(pageOperObj,pageNum){
+	showLoader("正在加载数据，请稍候...");
 	var curValue = pageOperObj.data("curId");
 	var backCall = function(data){
 		var obj = JSON.parse(data);
@@ -240,7 +318,8 @@ function getData(pageOperObj,pageNum){
 			}
 			orgTreeObj.pageNum = pageNum;
 			orgTreeObj.show(result,(curValue==null?true:false),curValue);
-		}						
+		}
+		hideLoader();						
 	};
 	if(popType==2){
 		sendForSupplyUnit(curValue,pageNum,backCall);
@@ -257,6 +336,7 @@ function getData(pageOperObj,pageNum){
 
 //返回上一级取数
 function getUpLevelData(curValue){
+	showLoader("正在加载数据，请稍候...");
 	var backCall = function(data){
 		var obj = JSON.parse(data);
 		var result = obj.result;
@@ -272,7 +352,8 @@ function getUpLevelData(curValue){
 			}
 			orgTreeObj.pageNum = 1;
 			orgTreeObj.show(result,(curValue==null?true:false),curValue);
-		}						
+		}			
+		hideLoader();			
 	};
 	if(popType==2){
 		sendForSupplyUnit(curValue,1,backCall);

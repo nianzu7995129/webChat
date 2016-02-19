@@ -170,6 +170,8 @@
 		//如下数据，当机构改变时需要清空
 		var customerData = null;//客户数据
 		
+		var ajaxTimeout = 1000000;
+		
 		$(function(){
 			var status = 0;// 0:显示查询，1:显示结果
 			$('div[data-role="navbar"] a').on('click', function () {
@@ -234,8 +236,8 @@
 					data: "action=action_query_wlzmb&OperatorID=<%=OperatorID%>&supplyUnit="+danwei+"&organization="+organization+"&includeYSYF="+baohanyushouyufu+"&filter="+showAll,
 					type: "POST",
 					dataType: 'text',
-					timeout: 10000,
-					async:false,
+					timeout: ajaxTimeout,
+					async:true,
 					error: function(XMLHttpRequest, textStatus, errorThrown){
 						showTip("请求服务器数据异常!",true);
 					},
@@ -423,8 +425,8 @@
 				data: "action=action_organization&OperatorID=<%=OperatorID%>&userType=15",
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 				},
@@ -454,17 +456,17 @@
 		//生成供货单位
 		function sendForSupplyUnit(supplyUnitCode,pageNum,backCall){
 			var organization =  $("#jigou").data("orgCode");
-			var requestData = "action=action_wlzmb_yskcx_unit&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum=1&itemsInEachPage=5"
+			var requestData = "action=action_wlzmb_yskcx_unit&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum=1&itemsInEachPage=14"
 			if(typeof(pageNum)!="undefined" && typeof(supplyUnitCode)!="undefined"){
-				requestData = "action=action_wlzmb_yskcx_unit&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum="+pageNum+"&itemsInEachPage=5&supplyUnitCode="+supplyUnitCode
+				requestData = "action=action_wlzmb_yskcx_unit&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum="+pageNum+"&itemsInEachPage=14&supplyUnitCode="+supplyUnitCode
 			}
 			$.ajax({
 				url: contextPath+"/BusinessServlet",
 				data: requestData,
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 				},
@@ -510,17 +512,17 @@
 			}else if(sub_organization=="00004"){//加盟机构
 				otherParam = "&custom1=32&bDisplayStop=1";
 			}
-			var requestData = "action=action_supplyunit_byname&name="+danwei+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum=1&itemsInEachPage=5"+otherParam;
+			var requestData = "action=action_supplyunit_byname&name="+danwei+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum=1&itemsInEachPage=14"+otherParam;
 			if(pageNum!=null){
-				requestData = "action=action_supplyunit_byname&name="+danwei+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum="+pageNum+"&itemsInEachPage=5"+otherParam;
+				requestData = "action=action_supplyunit_byname&name="+danwei+"&OperatorID=<%=OperatorID%>&organization="+organization+"&pageNum="+pageNum+"&itemsInEachPage=14"+otherParam;
 			}
 			$.ajax({
 				url: contextPath+"/BusinessServlet",
 				data: requestData,
 				type: "POST",
 				dataType: 'text',
-				timeout: 10000,
-				async:false,
+				timeout: ajaxTimeout,
+				async:true,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					showTip("请求服务器数据异常!",true);
 					return;

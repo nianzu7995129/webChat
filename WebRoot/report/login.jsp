@@ -92,6 +92,8 @@
 		var userInfoData = {"userList": []};//用户列表
 		var reportData = {"reportList":[]};//报表列表
 		var base64 = new Base64();
+		var ajaxTimeout = 1000000;
+		
 		$(function(){
 			//隐藏"权限设置"和"继续访问"
 			$('#privSetBtn').parent("div").css('display','none');
@@ -113,8 +115,8 @@
 					data: requestData,
 					type: "POST",
 					dataType: 'text',
-					timeout: 10000,
-					async:false,
+					timeout: ajaxTimeout,
+					async:true,
 					error: function(XMLHttpRequest, textStatus, errorThrown){
 						showTip("请求服务器数据异常!",true);
 						return;
@@ -164,8 +166,8 @@
 					data: requestData,
 					type: "POST",
 					dataType: 'text',
-					timeout: 10000,
-					async:false,
+					timeout: ajaxTimeout,
+					async:true,
 					error: function(XMLHttpRequest, textStatus, errorThrown){
 						hideLoader();
 						showTip("请求服务器数据异常!",true);
@@ -232,8 +234,8 @@
 					data: requestData,
 					type: "POST",
 					dataType: 'text',
-					timeout: 10000,
-					async:false,
+					timeout: ajaxTimeout,
+					async:true,
 					error: function(XMLHttpRequest, textStatus, errorThrown){
 						hideLoader();
 						showTip("请求服务器数据异常!",true);
@@ -300,8 +302,8 @@
 					data: requestData,
 					type: "POST",
 					dataType: 'text',
-					timeout: 10000,
-					async:false,
+					timeout: ajaxTimeout,
+					async:true,
 					error: function(XMLHttpRequest, textStatus, errorThrown){
 						hideLoader();
 						showTip("请求服务器数据异常!",true);
@@ -395,8 +397,8 @@
 					data: requestData,
 					type: "POST",
 					dataType: 'text',
-					timeout: 10000,
-					async:false,
+					timeout: ajaxTimeout,
+					async:true,
 					error: function(XMLHttpRequest, textStatus, errorThrown){
 						hideLoader();
 						showTip("请求服务器数据异常!",true);

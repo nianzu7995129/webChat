@@ -54,9 +54,11 @@ public class Goods {
 			}
 
 			List<Goods> goodsList = resultSetToList(rs, totalPage);
+			/*
 			for (Goods tmp : goodsList) {
 				tmp.setSubList(findNext(dba, tmp.ptypeid, szktypeid, OperatorID, bDisplayStop, selectType, itemsInEachPage));
 			}
+			*/
 			result = JSONArray.fromObject(goodsList);
 		} catch (Exception e) {
 			e.printStackTrace();
