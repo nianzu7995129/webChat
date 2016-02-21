@@ -33,6 +33,8 @@
 						<input type="password" name="password" id="password" data-clear-btn="true">
 					</div>
 					
+					<input type="button" id="pwdSetBtn" class="ui-btn" data-inline="true" value="重设密码">
+					
 					<input type="button" id="privSetBtn" class="ui-btn" data-inline="true" value="权限设置">
 					
 					<input type="button" id="goOnVisitBtn"  class="ui-btn" data-inline="true" value="继续访问">
@@ -66,11 +68,11 @@
 				<input type="button" id="saveAndBackToPageUserListBtn" class="ui-btn" data-corners="false" data-theme="b" value="保存">
 			</div>
 		</div>
-		<!-- 弹出层用于增加用户 -->
+		<!-- 弹出层用于增加用户或重设管理员密码 -->
 		<div data-role="page" id="pageAddUser">
 			<div data-role="content" data-theme="b">
-				<div class="ui-field-contain">
-					<label for="new_username">用户名：</label>
+				<div id="new_username_div" class="ui-field-contain">
+					<label id="new_username_label" for="new_username">用户名：</label>
 					<input type="text" name="new_username" id="new_username"  data-clear-btn="true">
 				</div>
 				<div class="ui-field-contain">
@@ -95,7 +97,8 @@
 		var ajaxTimeout = 1000000;
 		
 		$(function(){
-			//隐藏"权限设置"和"继续访问"
+			//隐藏管理员的"重设密码"，"权限设置"和"继续访问"
+			$('#pwdSetBtn').parent("div").css('display','none');
 			$('#privSetBtn').parent("div").css('display','none');
 			$('#goOnVisitBtn').parent("div").css('display','none');
 			
@@ -106,7 +109,7 @@
 					showTip("用户名不能为空!",true);
 					return;
 				}
-				var pd = $("#password").val();
+				var pd = $.trim($("#password").val());
 				var bun = base64.encode(un);
 				var bpd = base64.encode(pd);
 				var requestData = "action=action_login&un="+bun+"&pd="+bpd;
@@ -129,6 +132,10 @@
 							if("admin" == un){
 								$('#privSetBtn').parent("div").css('display','block');
 								$('#privSetBtn').css('data-inline','true');
+								if("" == pd){
+									$('#pwdSetBtn').parent("div").css('display','block');
+									$('#pwdSetBtn').css('data-inline','true');
+								}
 							}
 							if("<%=visitPage%>"!=""){
 								$('#goOnVisitBtn').parent("div").css('display','block');
@@ -147,6 +154,20 @@
 						}
 					}
 			    });
+			});
+			
+			//设置面
+			$("#pwdSetBtn").bind("click",function(){
+				$.mobile.changePage($("#pageAddUser"), {
+					 'allowSamePageTransition' : false,
+					 'reloadPage' : false,
+					 transition: 'none'
+				});
+				//设置用户名不可见
+				$("#new_username_div").css("display","none");	
+				$("#new_username_label").css("display","none");	
+				$("#new_username").css("display","none");	
+				$("#new_username").val("admin");
 			});
 			
 			//权限设置
@@ -246,14 +267,23 @@
 						var obj = JSON.parse(data);
 						var isError = obj.isError;
 						if(isError=="false"){
-							$.mobile.changePage($("#pageUserList"), {
-								 'allowSamePageTransition' : false,
-								 'reloadPage' : false,
-								 transition: 'none'
-							});
-							var userInfo = {"un": new_un,"auth": ""};
-							userInfoData.userList.push(userInfo);
-							showUserList(userInfoData);
+							if("admin"!=new_un){
+								$.mobile.changePage($("#pageUserList"), {
+									 'allowSamePageTransition' : false,
+									 'reloadPage' : false,
+									 transition: 'none'
+								});
+								var userInfo = {"un": new_un,"auth": ""};
+								userInfoData.userList.push(userInfo);
+								showUserList(userInfoData);
+							}else{
+								$.mobile.changePage($("#pageHome"), {
+									 'allowSamePageTransition' : false,
+									 'reloadPage' : false,
+									 transition: 'none'
+								});
+								$('#pwdSetBtn').parent("div").css('display','none');
+							}
 						}else{
 							showTip(obj.result,true);
 						}
@@ -265,11 +295,20 @@
 			
 			//增加新用户-返回
 			$("#saveUserBackBtn").bind("click",function(){
-				$.mobile.changePage($("#pageUserList"), {
-					 'allowSamePageTransition' : false,
-					 'reloadPage' : false,
-					 transition: 'none'
-				});
+				var tmpUserName = $("#new_username").val();
+				if(tmpUserName=="admin"){
+					$.mobile.changePage($("#pageHome"), {
+						 'allowSamePageTransition' : false,
+						 'reloadPage' : false,
+						 transition: 'none'
+					});
+				}else{
+					$.mobile.changePage($("#pageUserList"), {
+						 'allowSamePageTransition' : false,
+						 'reloadPage' : false,
+						 transition: 'none'
+					});
+				}
 			});
 			
 			//用户列表界面返回到登录界面

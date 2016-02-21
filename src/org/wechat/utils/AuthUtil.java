@@ -114,7 +114,7 @@ public class AuthUtil {
 	}
 	
 	/**
-	 * 增加用户
+	 * 增加用户或修改管理员密码，修改管理员密码，仅为第一次管理员密码为空的情况
 	 * @param username 
 	 * @return
 	 * @throws Exception 
@@ -130,22 +130,25 @@ public class AuthUtil {
 			JSONObject tjo = ja.getJSONObject(i);
 			String tmpUserName = tjo.getString("un");
 			if(username.equals(tmpUserName)){
-				isError = true;
-				break;
+				if(!"admin".equals(username)){
+					isError = true;
+					break;
+				}else{
+					tjo.put("pd", pwd);
+				}
 			}
 		}
 		if(isError){
 			info = "已存在相同用户";
 		}else{
-			JSONObject njo = new JSONObject();
-			njo.put("un", username);
-			njo.put("pd", pwd);
-			njo.put("auth", "");
-			ja.put(njo);
-			isError = writeAuthConfig2File(jo.toString());
-			if(isError){
-				info = "用户添加失败";
+			if(!"admin".equals(username)){
+				JSONObject njo = new JSONObject();
+				njo.put("un", username);
+				njo.put("pd", pwd);
+				njo.put("auth", "");
+				ja.put(njo);
 			}
+			isError = writeAuthConfig2File(jo.toString());
 		}
 		return resultJson(isError,info);
 	}
