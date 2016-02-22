@@ -115,7 +115,7 @@ function Tree(container,upLevel,choosedInfoValue,choosedInfoLabel,propId,propNam
 				}
 			}else if(popType==2 || popType==4){
 				hrefObj.bind("click",function(){ 
-					if(popType!=1 && popType!=2 && popType!=3 && popType!=4){//树形组件只能选叶节点
+					if(that.isOnlyLeaf==false || popType!=1 && popType!=2 && popType!=3 && popType!=4){//树形组件只能选叶节点
 						$("#"+choosedInfoLabel).attr("value",$(this).text());
 						$("#"+choosedInfoValue).attr("value",$(this).attr(propId));
 					}
