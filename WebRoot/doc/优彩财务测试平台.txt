@@ -1,0 +1,213 @@
+115.28.43.22 (公)  云主机
+
+用户名 administrator
+密码 Game1234
+
+软件登录网址 http://115.28.43.22/fzceshi
+
+数据库sql2008  用户名sa 密码691107
+
+测试的数据库名为 ceshi
+
+账套名为 ceshi
+
+进入软件用户名admin 密码为空
+
+
+微信平台登录 用户名 ezjse@sina.com
+               密码   69110772abcd
+
+邮箱 ezjse@sina.com  登录密码 69110812
+
+
+我的联系方式 qq 846270082  微信号 13335175398  电话 13335175398
+
+集深的
+2855838043@qq.com Meng1893112
+
+
+菜单生成网站：http://menu.fangbei.org/index.php
+
+AppID(应用ID) ： wx979468582d2cc19d
+
+appSecret(应用密钥) ： 829e06bae750fe871556a9d0ed4bc69c 
+
+
+菜单信息：
+{
+    "button": [
+        {
+            "name": "业务报表",
+            "sub_button": [
+                {
+                    "type": "view",
+                    "name": "采购订单",
+                    "url": "http://jnyc.tunnel.qydev.com/demo/CoreServlet?action=showReport&reportName=cgdd"
+                },
+                {
+                    "type": "view",
+                    "name": "库存状况表",
+                    "url": "http://jnyc.tunnel.qydev.com/demo/CoreServlet?action=showReport&reportName=kczkb"
+                },
+                {
+                    "type": "view",
+                    "name": "往来账目表",
+                    "url": "http://jnyc.tunnel.qydev.com/demo/CoreServlet?action=showReport&reportName=wlzmb"
+                },
+                {
+                    "type": "view",
+                    "name": "销售订单",
+                    "url": http://jnyc.tunnel.qydev.com/demo/CoreServlet?action=showReport&reportName=xsdd"
+                }
+            ]
+        }
+    ]
+}
+SAE版本：（由于php调服务器，调数据库，不能进行） http://wxreport.applinzi.com/coreServlet
+{
+    "button": [
+        {
+            "name": "业务报表",
+            "sub_button": [
+                {
+                    "type": "view",
+                    "name": "采购订单",
+                    "url": "http://wxreport.applinzi.com/report/report_cgdd.php"
+                },
+                {
+                    "type": "view",
+                    "name": "库存状况表",
+                    "url": "http://wxreport.applinzi.com/report/report_kczkb.php"
+                },
+                {
+                    "type": "view",
+                    "name": "商品销售分析表",
+                    "url": "http://wxreport.applinzi.com/report/report_spxsfxb.php"
+                },
+                {
+                    "type": "view",
+                    "name": "往来账目表",
+                    "url": "http://wxreport.applinzi.com/report/report_wlzmb.php"
+                },
+                {
+                    "type": "view",
+                    "name": "销售订单",
+                    "url": "http://wxreport.applinzi.com/report/report_xsdd.php"
+                }
+            ]
+        }
+    ]
+}
+
+JAVA版本 https://c518afad.ngrok.io/demo/CoreServlet
+
+{
+    "button": [
+        {
+            "name": "业务报表",
+            "sub_button": [
+                {
+                    "type": "view",
+                    "name": "采购订单",
+                    "url": "http://wx.youcaihao.com/demo/report/report_cgdd.jsp"
+                },
+                {
+                    "type": "view",
+                    "name": "库存状况表",
+                    "url": "http://wx.youcaihao.com/demo/report/report_kczkb.jsp"
+                },
+                {
+                    "type": "view",
+                    "name": "销售订单",
+                    "url": "http://wx.youcaihao.com/demo/report/report_xsdd.jsp"
+                },
+                {
+                    "type": "view",
+                    "name": "商品销售分析表",
+                    "url": "http://wx.youcaihao.com/demo/report/report_spxsfxb.jsp"
+                }
+            ]
+        },
+	{
+            "name": "往来账目",
+            "sub_button": [
+               {
+                    "type": "view",
+                    "name": "应付款查询",
+                    "url": "http://wx.youcaihao.com/demo/report/report_yfkcx.jsp"
+                },
+                {
+                    "type": "view",
+                    "name": "应收款查询",
+                    "url": "http://wx.youcaihao.com/demo/report/report_yskcx.jsp"
+                }
+            ]
+        },
+	{
+            "name": "用户登录",
+            "sub_button": [
+               {
+                    "type": "view",
+                    "name": "切换用户",
+                    "url": "http://wx.youcaihao.com/demo/report/login.jsp"
+                }
+            ]
+        }
+    ]
+}
+
+JAVA 按钮版本  https://c518afad.ngrok.io/demo/CoreServlet
+
+{
+    "button": [
+        {
+            "name": "业务报表",
+            "sub_button": [
+                {
+                    "type": "click",
+                    "name": "采购订单",
+                    "key": "report_cgdd"
+                },
+                {
+                    "type": "click",
+                    "name": "库存状况表",
+                    "key": "report_kczkb"
+                },
+                {
+                    "type": "click",
+                    "name": "往来账目表",
+                    "key": "report_wlzmb"
+                },
+                {
+                    "type": "click",
+                    "name": "销售订单",
+                    "key": "report_xsdd"
+                }
+            ]
+        }
+    ]
+}
+
+/*
+
+	        {
+                    "type": "view",
+                    "name": "商品销售分析表",
+                    "url": "http://acd646c0.ngrok.io/demo/ShowReportServlet?yx=U19QOVwPafDrsOGrJvykRw=="
+                },
+
+*/
+
+
+服务器环境以及SQL Server信息：
+IP地址：123.57.209.53
+用户：administrator
+密码 ：Game1234
+管家婆软件 用户名admin 
+密码dminasql2008
+数据库信息（外网123.57.209.53,1433）：
+数据库实例：WewaySoftFZ2
+用户/密码：sa/691107
+
+
+http://123.57.209.53/fz2/  账套名称 WewaySoftFZ2  用户名　admin 密码　dmina
