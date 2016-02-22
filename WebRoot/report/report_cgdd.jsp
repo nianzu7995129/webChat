@@ -1151,7 +1151,6 @@
 					if(obj.isError=="true"){
 						showTip(result,true);
 					}else{
-						$("#treeContainer").empty();
 						goodsData = JSON.stringify(result);
 					}
 					$.mobile.changePage($("#pageBasic"), {

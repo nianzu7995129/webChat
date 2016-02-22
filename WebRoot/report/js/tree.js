@@ -3,8 +3,10 @@
  * upLevelObj 上一级菜单jquery对象
  * propId  id节点递归属性
  * propName 节点显示名称
+ * showPageOper 显示上一页，下一页
+ * isOnlyLeaf 是否只能选择叶节点
  */
-function Tree(container,upLevel,choosedInfoValue,choosedInfoLabel,propId,propName,showPageOper){
+function Tree(container,upLevel,choosedInfoValue,choosedInfoLabel,propId,propName,showPageOper,isOnlyLeaf){
 	this.container = container;
 	this.upLevel = upLevel;
 	this.propId = propId;
@@ -14,6 +16,7 @@ function Tree(container,upLevel,choosedInfoValue,choosedInfoLabel,propId,propNam
 	this.maxItemsInEachPage = 5;	//每页约定最大显示数目 （只读不可改，后续取数也放到该文件中，彻底封装）
 	this.realItemsInEachPage = 1;	//实际每页显示数目
 	this.totalPageNum = 1;
+	this.isOnlyLeaf = isOnlyLeaf; //只能选择叶节点
 	var that = this;
 	var btnArray;
 	var choosedInfoValue;
@@ -25,6 +28,10 @@ function Tree(container,upLevel,choosedInfoValue,choosedInfoLabel,propId,propNam
 		$("#pageOper").css("display","none");
 	}else{
 		$("#pageOper").css("display","block");
+	}
+	
+	if(typeof(this.isOnlyLeaf)=="undefinded"){
+		this.isOnlyLeaf = true;
 	}
 	
 	//清空
@@ -78,7 +85,7 @@ function Tree(container,upLevel,choosedInfoValue,choosedInfoLabel,propId,propNam
 				var len = subArray.length;
 				if(len>0){
 					hrefObj.bind("click",function(){ 
-						if(popType!=1 && popType!=2 && popType!=3 && popType!=4){//树形组件只能选叶节点
+						if(that.isOnlyLeaf==false || popType!=1 && popType!=2 && popType!=3 && popType!=4){//树形组件只能选叶节点
 							$("#"+choosedInfoLabel).attr("value",$(this).text());
 							$("#"+choosedInfoValue).attr("value",$(this).attr(propId));
 						}

@@ -553,16 +553,29 @@ public class DBUtils {
 			paramList.add(organization);
 			paramList.add(OperatorID);
 			ResultSet rs = dba.executeQuery(sql, paramList);
+			int index = 0;
+			String ptypeid = "";
+			int SqtySum = 0;
+			double CostTotalSum = 0;
+			double ProfittotalSum = 0;
 			while (rs.next()) {
-				String ptypeid = rs.getString("ptypeid");// 商品标识
+				ptypeid = rs.getString("ptypeid");// 商品标识
 				int Sqty = rs.getInt("Sqty");// 销售数量
 				double CostTotal = rs.getDouble("CostTotal");// 成本金额
 				double Profittotal = rs.getDouble("Profittotal");// 毛利额
-				jo.put("ptypeid", ptypeid);// 商品标识
-				jo.put("Sqty", new Integer(Sqty));// 销售数量
-				jo.put("CostTotal", new Double(CostTotal));// 成本金额
-				jo.put("Profittotal", new Double(Profittotal));// 毛利额
+				index++;
+				SqtySum+=Sqty;
+				CostTotalSum+=CostTotal;
+				ProfittotalSum+=Profittotal;
 			}
+			if(index==1){
+				jo.put("ptypeid", ptypeid);// 商品标识
+			}else{
+				jo.put("ptypeid", "");// 多于一条记录，则不显示商品名称
+			}
+			jo.put("Sqty", new Integer(SqtySum));// 销售数量
+			jo.put("CostTotal", new Double(CostTotalSum));// 成本金额
+			jo.put("Profittotal", new Double(ProfittotalSum));// 毛利额
 			result = jo.toString();
 		} catch (Exception e) {
 			e.printStackTrace();

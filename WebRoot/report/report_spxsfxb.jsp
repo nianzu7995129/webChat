@@ -233,28 +233,34 @@
 				}
 				
 				//验证商品
+				
 				var shangpin =  $("#shangpin").data("orgCode");
+				if(typeof(shangpin) == "undefined"){
+					shangpin = "";
+				}
+				/*
 				if(typeof(shangpin) == "undefined" || shangpin==null || shangpin.length==0){
 					showTip("请选择商品",true);
 					return;
 				}
-				
+				*/
 				//验证职员
 				var zhiyuan =  $("#zhiyuan").val();
+				/*
 				if(typeof(zhiyuan) == "undefined" || zhiyuan==null || zhiyuan.length==0){
 					showTip("请选择职员",true);
 					return;
 				}
-				
+				*/
 				//验证部门
+				
 				var bumen =  $("#bumen").val();
+				/*
 				if(typeof(bumen) == "undefined" || bumen==null || bumen.length==0){
 					showTip("请选择部门",true);
 					return;
 				}
-				
-				
-				
+				*/
 				$.ajax({
 					url: contextPath+"/BusinessServlet",
 					data: "action=action_query_spxsfxb&OperatorID=<%=OperatorID%>&goodsID="+shangpin+"&organization="+organization+"&beginDate="+kaishiriqi+"&endDate="+jieshuriqi+"&employeeID="+zhiyuan+"&deptId="+bumen,
@@ -480,7 +486,7 @@
 							 'reloadPage' : false,
 							 transition: 'none'
 						});
-						orgTreeObj = new Tree("treeContainer","returnParentDiv","choosedInfoValue","choosedInfoLabel","BCtypeid","BCFullName",false);
+						orgTreeObj = new Tree("treeContainer","returnParentDiv","choosedInfoValue","choosedInfoLabel","BCtypeid","BCFullName",false,false);
 						orgTreeObj.show(result,true,null);
 						if(backCall){
 							backCall();
@@ -513,15 +519,12 @@
 						showTip(listArr,true);
 					}else{
 						var len = listArr.length;
+						$("#zhiyuan").append("<option selected value=''>请选择...</option>");
 						for(var i=0;i<len;i++){
 							var dataObj = listArr[i];
 							var currValue = dataObj.etypeid;
 							var currText = dataObj.efullname;
-							if(i==0){
-								$("#zhiyuan").append("<option selected value='"+currValue+"'>"+currText+"</option>");
-							}else{
-								$("#zhiyuan").append("<option value='"+currValue+"'>"+currText+"</option>");
-							}
+							$("#zhiyuan").append("<option value='"+currValue+"'>"+currText+"</option>");
 						}
 						$("#zhiyuan").selectmenu('refresh', true);
 						if(backCall){
@@ -557,16 +560,13 @@
 					if(obj.isError=="true"){
 						showTip(resultObj,true);
 					}else{
+						$("#bumen").append("<option selected value=''>请选择...</option>");
 						var len = infoArray.length;
 						for(var i=0;i<len;i++){
 							var dataObj = infoArray[i];
 							var currValue = dataObj.dtypeid;
 							var currText = dataObj.dfullname;
-							if(i==0){
-								$("#bumen").append("<option selected value='"+currValue+"'>"+currText+"</option>");
-							}else{
-								$("#bumen").append("<option value='"+currValue+"'>"+currText+"</option>");
-							}
+							$("#bumen").append("<option value='"+currValue+"'>"+currText+"</option>");
 						}
 						$("#bumen").selectmenu('refresh', true);
 						if(backCall){
@@ -603,17 +603,13 @@
 					if(obj.isError=="true"){
 						showTip(resultObj,true);
 					}else{
+						$("#cangku").append("<option selected value=''>请选择...</option>");
 						var len = infoArray.length;
 						for(var i=0;i<len;i++){
 							var dataObj = infoArray[i];
 							var currValue = dataObj.typeID;
 							var currText = dataObj.fullName;
-							if(i == 0){
-								$("#cangku").append("<option selected value='"+currValue+"'>"+currText+"</option>");
-								$("#cangkuquanming").val(currText);
-							}else{
-								$("#cangku").append("<option value='"+currValue+"'>"+currText+"</option>");
-							}
+							$("#cangku").append("<option value='"+currValue+"'>"+currText+"</option>");
 						}
 						$("#cangku").selectmenu('refresh', true);
 						if(backFunc){
@@ -648,7 +644,6 @@
 					if(obj.isError=="true"){
 						showTip(result,true);
 					}else{
-						$("#treeContainer").empty();
 						goodsData = JSON.stringify(result);
 					}
 					$.mobile.changePage($("#pageBasic"), {
@@ -658,7 +653,7 @@
 					});
 					//树组件内部调用，这里不用刷新了
 					if(pageNum==null){
-						orgTreeObj = new Tree("treeContainer","returnParentDiv","choosedInfoValue","choosedInfoLabel","ptypeid","pfullname",true);
+						orgTreeObj = new Tree("treeContainer","returnParentDiv","choosedInfoValue","choosedInfoLabel","ptypeid","pfullname",true,false);
 						orgTreeObj.show(result,true,null);
 					}
 					if(backFunc){
