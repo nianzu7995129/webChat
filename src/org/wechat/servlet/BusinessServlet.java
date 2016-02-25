@@ -217,13 +217,23 @@ public class BusinessServlet extends HttpServlet {
 				result = bs.saveForCGDD(cgddInfo, goodsInfo, goodsDetailInfo);
 			} else if (action_query_spxsfxb.equals(action)) {
 				String goodsID = request.getParameter("goodsID");
+				String storeHouseID = request.getParameter("storeHouseID");
+				if(storeHouseID!=null){
+					storeHouseID = storeHouseID.trim();
+				}
 				String beginDate = request.getParameter("beginDate");
 				String endDate = request.getParameter("endDate");
 				String employeeID = request.getParameter("employeeID");
+				if(employeeID!=null){
+					employeeID = employeeID.trim();
+				}
 				String deptId = request.getParameter("deptId");
+				if(deptId!=null){
+					deptId = deptId.trim();
+				}
 				String organization = request.getParameter("organization");
 				String OperatorID = request.getParameter("OperatorID");
-				result = bs.queryForSPXSFXB(goodsID, beginDate, endDate, employeeID,deptId,organization,OperatorID);
+				result = bs.queryForSPXSFXB(goodsID, storeHouseID,beginDate, endDate, employeeID,deptId,organization,OperatorID);
 			} else {
 				result = "未知的action:" + action;
 				isError = true;

@@ -534,18 +534,19 @@ public class DBUtils {
 	
 	// --------------------------------------商品销售分析表------------------------------------>>
 
-	public static String genQueryResultForSPXSFXB(String goodsId, String beginDate,String endDate,String employeeID,String deptId,String organization,String OperatorID) throws Exception {
+	public static String genQueryResultForSPXSFXB(String goodsId, String storeHouseID,String beginDate,String endDate,String employeeID,String deptId,String organization,String OperatorID) throws Exception {
 		DBAccess dba = null;
 		JSONObject jo = new JSONObject();
 		String result = jo.toString();
 		try {
 			dba = new DBAccess(true);
 			// 查询应收信息
-			String sql = "exec FZSaleAnalyse_BS @szPtypeId=?,@szKtypeid=N'',@szBtypeid=N'',@szBtypeid1=N'',@szBeginData=?,@szEndData=?,@ifstop=N'0',@Etypeid=?,@SaleTraitname=N'全部',@Dtypeid=?,@CustType=N'',@branchid=?,@vchtype=N'',@OperatorId=?,@OpID=N'0',@salepriceid=N''";
+			String sql = "exec FZSaleAnalyse_BS @szPtypeId=?,@szKtypeid=?,@szBtypeid=N'',@szBtypeid1=N'',@szBeginData=?,@szEndData=?,@ifstop=N'0',@Etypeid=?,@SaleTraitname=N'全部',@Dtypeid=?,@CustType=N'',@branchid=?,@vchtype=N'',@OperatorId=?,@OpID=N'0',@salepriceid=N''";
 			//String sql = "exec FZSaleAnalyse_BS @szPtypeId=N'00005',@szKtypeid=N'',@szBtypeid=N'',@szBtypeid1=N'',@szBeginData=N'2016-01-01',@szEndData=N'2016-01-05',@ifstop=N'0',@Etypeid=N'00001',@SaleTraitname=N'全部',@Dtypeid=N'00001',@CustType=N'',@branchid=N'0000100001',@vchtype=N'',@OperatorId=N'00002',@OpID=N'0',@salepriceid=N''";
 			// 设置输入参数列表
 			List<Object> paramList = new ArrayList<Object>();
 			paramList.add(goodsId);
+			paramList.add(storeHouseID);
 			paramList.add(beginDate);
 			paramList.add(endDate);
 			paramList.add(employeeID);
@@ -558,15 +559,18 @@ public class DBUtils {
 			int SqtySum = 0;
 			double CostTotalSum = 0;
 			double ProfittotalSum = 0;
+			double STotalSum = 0;
 			while (rs.next()) {
 				ptypeid = rs.getString("ptypeid");// 商品标识
 				int Sqty = rs.getInt("Sqty");// 销售数量
 				double CostTotal = rs.getDouble("CostTotal");// 成本金额
 				double Profittotal = rs.getDouble("Profittotal");// 毛利额
+				double STotal = rs.getDouble("STotal");// 实销金额
 				index++;
 				SqtySum+=Sqty;
 				CostTotalSum+=CostTotal;
 				ProfittotalSum+=Profittotal;
+				STotalSum+=STotal;
 			}
 			if(index==1){
 				jo.put("ptypeid", ptypeid);// 商品标识
@@ -576,6 +580,7 @@ public class DBUtils {
 			jo.put("Sqty", new Integer(SqtySum));// 销售数量
 			jo.put("CostTotal", new Double(CostTotalSum));// 成本金额
 			jo.put("Profittotal", new Double(ProfittotalSum));// 毛利额
+			jo.put("STotal", new Double(STotalSum));// 毛利额
 			result = jo.toString();
 		} catch (Exception e) {
 			e.printStackTrace();

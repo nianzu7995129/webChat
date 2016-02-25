@@ -106,6 +106,10 @@
 						<label for="maolie">毛利额：</label>
 						<input readonly="readonly" type="text" name="maolie" id="maolie" data-clear-btn="true">
 					</div>
+					<div class="ui-field-contain">
+						<label for="shixiaojine">实销金额：</label>
+						<input readonly="readonly" type="text" name="shixiaojine" id="shixiaojine" data-clear-btn="true">
+					</div>
 				</form>
 			</div>
 		</div>
@@ -232,8 +236,9 @@
 					return;
 				}
 				
-				//验证商品
+				var cangku = $("#cangku").val();
 				
+				//验证商品
 				var shangpin =  $("#shangpin").data("orgCode");
 				if(typeof(shangpin) == "undefined"){
 					shangpin = "";
@@ -263,7 +268,7 @@
 				*/
 				$.ajax({
 					url: contextPath+"/BusinessServlet",
-					data: "action=action_query_spxsfxb&OperatorID=<%=OperatorID%>&goodsID="+shangpin+"&organization="+organization+"&beginDate="+kaishiriqi+"&endDate="+jieshuriqi+"&employeeID="+zhiyuan+"&deptId="+bumen,
+					data: "action=action_query_spxsfxb&OperatorID=<%=OperatorID%>&goodsID="+shangpin+"&organization="+organization+"&beginDate="+kaishiriqi+"&endDate="+jieshuriqi+"&employeeID="+zhiyuan+"&deptId="+bumen+"&storeHouseID="+cangku,
 					type: "POST",
 					dataType: 'text',
 					timeout: ajaxTimeout,
@@ -289,6 +294,8 @@
 							$("#chengbenjine").val(CostTotal);
 							var Profittotal = result.Profittotal;// 毛利额	
 							$("#maolie").val(Profittotal);
+							var STotal = result.STotal;// 实销金额
+							$("#shixiaojine").val(STotal);
 							$("#nav_result").trigger("click");
 						}
 					}
@@ -519,7 +526,9 @@
 						showTip(listArr,true);
 					}else{
 						var len = listArr.length;
-						$("#zhiyuan").append("<option selected value=''>请选择...</option>");
+						var tmp1 = ' ';
+						var tmp2 = '请选择...';
+						$("#zhiyuan").append("<option value='"+tmp1+"'>"+tmp2+"</option>");
 						for(var i=0;i<len;i++){
 							var dataObj = listArr[i];
 							var currValue = dataObj.etypeid;
@@ -560,7 +569,9 @@
 					if(obj.isError=="true"){
 						showTip(resultObj,true);
 					}else{
-						$("#bumen").append("<option selected value=''>请选择...</option>");
+						var tmp1 = ' ';
+						var tmp2 = '请选择...';
+						$("#bumen").append("<option selected value='"+tmp1+"'>"+tmp2+"</option>");
 						var len = infoArray.length;
 						for(var i=0;i<len;i++){
 							var dataObj = infoArray[i];
@@ -603,7 +614,9 @@
 					if(obj.isError=="true"){
 						showTip(resultObj,true);
 					}else{
-						$("#cangku").append("<option selected value=''>请选择...</option>");
+						var tmp1 = ' ';
+						var tmp2 = '请选择...';
+						$("#cangku").append("<option selected value='"+tmp1+"'>"+tmp2+"</option>");
 						var len = infoArray.length;
 						for(var i=0;i<len;i++){
 							var dataObj = infoArray[i];

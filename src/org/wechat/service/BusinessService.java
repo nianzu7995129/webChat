@@ -419,8 +419,8 @@ public class BusinessService {
 		return result;
 	}
 	
-	public String queryForSPXSFXB(String goodsId, String beginDate,String endDate,String employeeID,String deptId,String organization,String OperatorID) throws Exception {
-		String result = DBUtils.genQueryResultForSPXSFXB(goodsId, beginDate, endDate, employeeID,deptId,organization,OperatorID);
+	public String queryForSPXSFXB(String goodsId, String storeHouseID ,String beginDate,String endDate,String employeeID,String deptId,String organization,String OperatorID) throws Exception {
+		String result = DBUtils.genQueryResultForSPXSFXB(goodsId, storeHouseID, beginDate, endDate, employeeID,deptId,organization,OperatorID);
 		return result;
 	}
 
