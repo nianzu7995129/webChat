@@ -59,6 +59,7 @@
 				<fieldset data-role="controlgroup">
 			        <input type="checkbox" name="cgdd" id="cgdd"><label for="cgdd">采购订单</label>
 			        <input type="checkbox" name="kczkb" id="kczkb"><label for="kczkb">库存状况表</label>
+			        <input type="checkbox" name="kczkb_jine" id="kczkb_jine"><label for="kczkb_jine">库存状况表:金额</label>
 			        <input type="checkbox" name="xsdd" id="xsdd"><label for="xsdd">销售订单</label>
 			        <input type="checkbox" name="spxsfxb" id="spxsfxb"><label for="spxsfxb">商品销售分析表</label>
 			        <input type="checkbox" name="yfkcx" id="yfkcx"><label for="yfkcx">应付款查询</label>
@@ -403,6 +404,7 @@
 			var authArr = auth.split(",");
 			refreshCheckbox("cgdd",authArr);
 			refreshCheckbox("kczkb",authArr);
+			refreshCheckbox("kczkb_jine",authArr);
 			refreshCheckbox("xsdd",authArr);
 			refreshCheckbox("spxsfxb",authArr);
 			refreshCheckbox("yfkcx",authArr);

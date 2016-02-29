@@ -3,6 +3,7 @@
 <%
 	String contextPath = request.getContextPath();
 	String OperatorID = (String)session.getAttribute("OperatorID");
+	boolean jineAuth = false;
 	if(OperatorID==null){
 		session.setAttribute("visitPage","report_kczkb.jsp");
 		response.setContentType("text/html; charset=UTF-8");
@@ -14,6 +15,7 @@
 			response.setContentType("text/html; charset=UTF-8");
 			response.sendRedirect("noAuth.jsp");
 		}
+		jineAuth = AuthUtil.checkValid(OperatorID,"kczkb_jine");
 	}
 %>
 <!DOCTYPE html>
@@ -52,7 +54,7 @@
 					</div>
 					<div class="ui-field-contain">
 						<label for="cangku">仓库全名：</label>
-						<select name="cangku" id="cangku" data-native-menu="false" data-theme="b"></select>
+						<select name="cangku" id="cangku" data-native-menu="false" data-theme="b" multiple="multiple"></select>
 					</div>
 					<div class="ui-field-contain">
 						<label for="shangpin">商品全名：</label>
@@ -82,6 +84,10 @@
 					<div class="ui-field-contain">
 						<label for="shijishuliang">实际数量：</label>
 						<input readonly="readonly" type="text" name="shijishuliang" id="shijishuliang" data-clear-btn="true">
+					</div>
+					<div class="ui-field-contain">
+						<label id="jinetitle" for="jine">金额：</label>
+						<input readonly="readonly" type="text" name="jine" id="jine" data-clear-btn="true">
 					</div>
 				</form>
 			</div>
@@ -137,10 +143,16 @@
 		
 		var ajaxTimeout = 1000000;
 		
+		var jineAuth = "<%=jineAuth%>";
+		
 		$(function(){
 			
 			//初始化时使部分下拉列表不可编辑，选择机构后才可编辑。这样不需要单独处理每个下拉列表的click加载
 			$("#cangku").selectmenu("disable",true);
+			if(jineAuth=="false"){
+				$('#jinetitle').parent("div").css('display','none');
+				$('#jine').parent("div").css('display','none');
+			}
 		
 			var status = 0;// 0:显示查询，1:显示结果
 			$('div[data-role="navbar"] a').on('click', function () {
@@ -197,23 +209,6 @@
 					sendForOrganization(hideLoader);
 				}
 			});
-			
-			//进入页面前已加载数据
-			/*
-			$("#shangpinHref").bind("click",function(){
-				var organization = $("#jigou").data("orgCode");
-				if(typeof(organization) == "undefined" || organization==null || organization.length==0){
-					showTip("请先选择机构",true);
-					return;
-				}
-				popType = 4;
-				showLoader();
-				var backCall = function(data){
-					hideLoader();
-				};
-				sendForGoods(null,null,hideLoader);
-			});
-			*/
 			
 			$("#shangpin").bind("keydown",function(event){
 				if(event.which==13){
@@ -324,43 +319,42 @@
 				popType = 0;
 			});
 			
-			//仓库名称改变查询结果中的仓库全名
-			$("#cangku").change(function(){
-				if(storeHouseList!=null){
-					var len = storeHouseList.length;
-					for(var i=0;i<len;i++){
-						var tmpStore =  storeHouseList[i];
-						if(tmpStore.typeID == $("#cangku").val()){
-							$("#cangkuquanming").val(tmpStore.fullName);
-							break;
-						}
-					}
-				}
-			});
-			
-			
 			//查询
 			$("#queryBtn").bind("click",function(){
 				//验证机构
 				var organization = $("#jigou").data("orgCode");
-				if(typeof(organization) == "undefined" || organization==null || organization.length==0){
-					showTip("请选择机构",true);
-					return;
+				if(typeof(organization) == "undefined"){
+					organization = "";
 				}
 				//验证仓库
 				var cangku =  $("#cangku").val();
-				if(typeof(cangku) == "undefined" || cangku==null || cangku.length==0){
-					showTip("请选择仓库",true);
-					return;
+				if(cangku==null || cangku == "null"){
+					cangku = "";
 				}
+				
+				var cangkuArrayLen = cangku.length;
+				var cangkuquanming = '';
+				if(storeHouseList!=null){
+					var len = storeHouseList.length;
+					for(var i=0;i<len;i++){
+						var tmpStore = storeHouseList[i];
+						for(var j=0;j<cangkuArrayLen;j++){
+							if(tmpStore.typeID == cangku[j]){
+								cangkuquanming+=tmpStore.fullName+",";
+							}
+						}
+					}
+				}
+				if(cangkuquanming.length>0){
+					cangkuquanming = cangkuquanming.substring(0,cangkuquanming.length-1);
+				}
+				$("#cangkuquanming").val(cangkuquanming);
 				
 				//验证商品
 				var shangpin =  $("#shangpin").data("orgCode");
-				if(typeof(shangpin) == "undefined" || shangpin==null || shangpin.length==0){
-					showTip("请选择商品",true);
-					return;
+				if(typeof(shangpin) == "undefined"){
+					shangpin = "";
 				}
-
 				$.ajax({
 					url: contextPath+"/BusinessServlet",
 					data: "action=action_query_kczk&OperatorID=<%=OperatorID%>&goodsId="+shangpin+"&organization="+organization+"&storeHouseID="+cangku,
@@ -379,7 +373,9 @@
 							showTip(result,true);
 						}else{
 							var Qty = result.Qty;//实际数量
+							var total = result.total;//金额
 							$("#shijishuliang").val(Qty);
+							$("#jine").val(total);
 							$("#nav_result").trigger("click");
 						}
 					}
@@ -397,7 +393,7 @@
 					 transition: 'none'
 				});
 				var obj = JSON.parse(treeData);
-				orgTreeObj = new Tree("treeContainer","returnParentDiv","choosedInfoValue","choosedInfoLabel","BCtypeid","BCFullName",false);
+				orgTreeObj = new Tree("treeContainer","returnParentDiv","choosedInfoValue","choosedInfoLabel","BCtypeid","BCFullName",false,false);
 				orgTreeObj.show(obj,true,null);
 				if(backCall){
 					backCall();
@@ -427,7 +423,7 @@
 							 'reloadPage' : false,
 							 transition: 'none'
 						});
-						orgTreeObj = new Tree("treeContainer","returnParentDiv","choosedInfoValue","choosedInfoLabel","BCtypeid","BCFullName",false);
+						orgTreeObj = new Tree("treeContainer","returnParentDiv","choosedInfoValue","choosedInfoLabel","BCtypeid","BCFullName",false,false);
 						orgTreeObj.show(result,true,null);
 						if(backCall){
 							backCall();
@@ -464,16 +460,14 @@
 						showTip(resultObj,true);
 					}else{
 						var len = infoArray.length;
+						var tmp1 = ' ';
+						var tmp2 = '请选择...';
+						$("#cangku").append("<option value='"+tmp1+"'>"+tmp2+"</option>");
 						for(var i=0;i<len;i++){
 							var dataObj = infoArray[i];
 							var currValue = dataObj.typeID;
 							var currText = dataObj.fullName;
-							if(i == 0){
-								$("#cangku").append("<option selected value='"+currValue+"'>"+currText+"</option>");
-								$("#cangkuquanming").val(currText);
-							}else{
-								$("#cangku").append("<option value='"+currValue+"'>"+currText+"</option>");
-							}
+							$("#cangku").append("<option value='"+currValue+"'>"+currText+"</option>");
 						}
 						$("#cangku").selectmenu('refresh', true);
 						if(backFunc){
@@ -517,7 +511,7 @@
 					});
 					//树组件内部调用，这里不用刷新了
 					if(pageNum==null){
-						orgTreeObj = new Tree("treeContainer","returnParentDiv","choosedInfoValue","choosedInfoLabel","ptypeid","pfullname",true);
+						orgTreeObj = new Tree("treeContainer","returnParentDiv","choosedInfoValue","choosedInfoLabel","ptypeid","pfullname",true,false);
 						orgTreeObj.show(result,true,null);
 					}
 					if(backFunc){

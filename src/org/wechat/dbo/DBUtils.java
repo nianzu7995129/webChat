@@ -514,9 +514,15 @@ public class DBUtils {
 			paramList.add(OperatorID);
 			paramList.add(new Integer(0));//库存类型 全部：0，普通：1 ，物料：3 （全部）
 			ResultSet rs = dba.executeQuery(sql, paramList);
+			int tmpQrySum = 0;
+			double totalSum = 0;
 			while (rs.next()) {
-				String tmpQry = rs.getString("Qty");
-				jo.put("Qty", tmpQry==null?"0":tmpQry);// 实际数量
+				int tmpQry = rs.getInt("Qty");
+				tmpQrySum+=tmpQry;
+				double total = rs.getDouble("total");
+				totalSum+=total;
+				jo.put("Qty", tmpQrySum);// 实际数量
+				jo.put("total", totalSum);// 金额
 			}
 			result = jo.toString();
 		} catch (Exception e) {
